@@ -1,13 +1,13 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
+// @dart=2.9
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/app_colors.dart';
-import 'package:dbcrypt/dbcrypt.dart';
-import 'package:quizme/utils/db_userhelper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({Key? key}) : super(key: key);
+  const SignupScreen({Key key}) : super(key: key);
 
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -20,12 +20,13 @@ class SignupScreen extends StatefulWidget {
 
 //pass the username to to other pages and store info under username
 //Todo: Encrypt Password
-//Todo: store the db on the same folder so its easier to run
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  String? _Email = '';
-  String? _Password = '';
-  String? _Username = '';
+  String _Email = '';
+  String _Password = '';
+  String _Username = '';
+
+  var userDB = FirebaseFirestore.instance.collection('Users');
 
   RegExp validPassword = RegExp(r'^[A-Za-z0-9]'); //for password
   RegExp validUsername = RegExp(r'^[A-Za-z_]'); //for username
@@ -157,7 +158,6 @@ class _SignupScreenState extends State<SignupScreen> {
                             return 'no special characters';
                           }
                           */
-                          //print(DBCrypt().hashpw(val, new DBCrypt().gensalt()));
 
                           return null;
                         },
@@ -175,29 +175,20 @@ class _SignupScreenState extends State<SignupScreen> {
                             minimumSize: MaterialStateProperty.all(
                                 Size(double.infinity, 35))),
                         onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
+                          if (_formKey.currentState.validate()) {
+                            _formKey.currentState.save();
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   duration: Duration(seconds: 1),
                                   content: Text('Valid'),
                                   backgroundColor: Colors.green),
                             );
-                            /*
-                            int result = await DBHelper.dbHelper.insertUser({
-                              "email": _Email,
-                              "password": _Password,
-                              "username": _Username
-                            });
-                            List db = await DBHelper.dbHelper.getData();
-                            print(db);
-                            */
-                            //delete this later
+                            addUser(_Email, _Username, _Password);
                             print(_Email);
                             print(_Password);
                             print(_Username);
                             Navigator.pop(context);
-                            //go back to login page
+                            //goes back to login page
                           }
                         },
                         child: const Text('Continue'),
@@ -226,5 +217,12 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> addUser(String email, String username, String password) {
+    return userDB
+        .add({'Email': email, 'Username': username, 'Password': password})
+        .then((value) => print("User Added"))
+        .catchError((error) => print("Failed to add user: $error"));
   }
 }

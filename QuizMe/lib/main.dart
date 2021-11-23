@@ -1,17 +1,20 @@
+// @dart=2.9
 import 'package:flutter/material.dart';
-
 import 'package:quizme/views/home_page.dart';
 import 'package:quizme/views/login_screen.dart';
 import 'package:quizme/views/signup_screen.dart';
 import 'package:quizme/views/quiz_picker.dart';
 import 'package:quizme/views/explore_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

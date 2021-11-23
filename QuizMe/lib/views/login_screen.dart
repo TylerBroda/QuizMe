@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/app_colors.dart';
 import 'package:dbcrypt/dbcrypt.dart';
-import 'package:quizme/utils/db_userhelper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
