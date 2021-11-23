@@ -4,6 +4,7 @@ import 'package:quizme/views/home_page.dart';
 import 'package:quizme/views/login_screen.dart';
 import 'package:quizme/views/signup_screen.dart';
 import 'package:quizme/views/quiz_picker.dart';
+import 'package:quizme/views/explore_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomePage(),
+        '/explorescreen': (context) => const ExploreScreen(),
         '/quizpicker': (context) => const QuizPicker(),
       },
     );

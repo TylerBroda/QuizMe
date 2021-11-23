@@ -53,15 +53,19 @@ class _QuizDrawerState extends State<QuizDrawer> {
               ),
               SizedBox(height: 50,),
               ListTile(
-                leading: Icon(Icons.settings),
+                leading: Icon(Icons.home),
                 title: Text("Home"),
               ),
               ListTile(
-                leading: Icon(Icons.settings),
+                leading: Icon(Icons.explore),
+                title: Text("Explore"),
+              ),
+              ListTile(
+                leading: Icon(Icons.person_search),
                 title: Text("Tutors"),
               ),
               ListTile(
-                leading: Icon(Icons.settings),
+                leading: Icon(Icons.people),
                 title: Text("Peers"),
               ),
               Spacer(),
