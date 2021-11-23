@@ -1,11 +1,13 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
+// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/app_colors.dart';
 import 'package:dbcrypt/dbcrypt.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({Key key}) : super(key: key);
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -19,9 +21,9 @@ class LoginScreen extends StatefulWidget {
 // adjust signup spacing
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String email = "1";
-  String password = "1";
-
+  var userDB = FirebaseFirestore.instance.collection('users');
+  String _Email;
+  String _Password;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,15 +76,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Colors.black87,
                             fontSize: 15,
                             fontFamily: 'AvenirLight'),
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
                             return "Missing email";
                           }
-                          // temp check - delete later
-                          if (val != email) {
-                            return "Invalid email or password";
-                          }
                           return null;
+                        },
+                        onSaved: (value) {
+                          _Email = value;
                         },
                       ),
                       TextFormField(
@@ -105,21 +106,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontSize: 15,
                             fontFamily: 'AvenirLight'),
                         obscureText: true,
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
                             return "Missing password";
                           }
-
-                          //TODO: Verify email & password against email & hashed password in DB
-                          print(val);
-                          print(DBCrypt().checkpw('aaa',
-                              DBCrypt().hashpw(val, new DBCrypt().gensalt())));
-
-                          // temp check - delete later
-                          if (val != password) {
-                            return "Invalid email or password";
-                          }
                           return null;
+                        },
+                        onSaved: (value) {
+                          _Email = value;
                         },
                       ),
                       SizedBox(
@@ -132,25 +126,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             minimumSize: MaterialStateProperty.all(
                                 Size(double.infinity, 35))),
                         onPressed: () {
-                          if (!_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                duration: Duration(seconds: 1),
-                                content: Text('Invalid'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          } else {
-                            // go to main screen if successfully logged in
-                            Navigator.pushReplacementNamed(context, '/home');
-
-                            // keep this for now to test db auth. delete it when that's working
+                          if (_formKey.currentState.validate()) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   duration: Duration(seconds: 1),
                                   content: Text('Valid'),
                                   backgroundColor: Colors.green),
                             );
+                            print(_Email);
+                            print(_Password);
                           }
                         },
                         child: const Text('Sign In'),
@@ -182,5 +166,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Stream<QuerySnapshot> getData() {
+    return userDB.snapshots();
   }
 }
