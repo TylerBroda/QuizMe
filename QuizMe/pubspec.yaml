@@ -36,6 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   percent_indicator:
   dbcrypt: ^2.0.0
+  firebase_core:
+  cloud_firestore:
 
 dev_dependencies:
   flutter_test:
