@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 
 import 'package:quizme/utils/app_colors.dart';
 
-class QuizDrawer extends StatefulWidget {
-  const QuizDrawer({Key? key}) : super(key: key);
+class AppDrawer extends StatefulWidget {
+  const AppDrawer({Key? key}) : super(key: key);
 
   @override
-  _QuizDrawerState createState() => _QuizDrawerState();
+  _AppDrawerState createState() => _AppDrawerState();
 }
 
 // wrap this in a SizedBox with width: MediaQuery.of(context).size.width * 0.75 to change drawer width
 // use the person's pfp
-class _QuizDrawerState extends State<QuizDrawer> {
+class _AppDrawerState extends State<AppDrawer> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
