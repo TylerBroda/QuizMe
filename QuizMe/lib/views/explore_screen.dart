@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:quizme/widgets/app_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -12,24 +13,102 @@ class ExploreScreen extends StatefulWidget {
 
 class _ExploreScreenState extends State<ExploreScreen> {
   final quizzes = FirebaseFirestore.instance.collection('quizzes');
+  List<DocumentSnapshot> filterDocs = [];
 
   int _selectedIndex = -1;
   String _docID = '';
 
+  List<String> options = ['All', 'English', 'History', 'Math', 'Science'];
+  String dropdownValue = 'All';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Explore")),
+      appBar: AppBar(
+        title: const Text("Explore"),
+        actions: <Widget>[
+          Container(
+            margin: EdgeInsets.only(top: 20, right: 5),
+            child: const Text(
+              'Category:', 
+              style: TextStyle(
+                fontWeight: FontWeight.bold
+              ),
+            )
+          ),
+          ButtonTheme(
+            alignedDropdown: true,
+            child: DropdownButton<String>(
+              value: dropdownValue,
+              icon: const Icon(Icons.arrow_downward),
+              iconEnabledColor: Colors.white,
+              iconSize: 20,
+              style: const TextStyle(color: Colors.black),
+              //For seperating colours between selected item & dropdown list items
+              //Had trouble with item positioning and dropdown size, commented out for now
+              /*
+              selectedItemBuilder: (BuildContext context) {
+                return options.map((String value) {
+                  return Text(
+                    dropdownValue,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  );
+                }).toList();
+              },
+              */
+              underline: Container(
+                height: 2,
+                color: Colors.white,
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownValue = newValue!;
+                });
+              },
+              items: options.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Container(
+                    width: 50,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(
+            width: 20
+          )
+        ],
+      ),
       drawer: const AppDrawer(),
       resizeToAvoidBottomInset: false,
       body: StreamBuilder(
         stream: quizzes.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return const Text("No Data");
+
+          //Filter quizzes by dropdown selection
+          filterDocs = snapshot.data!.docs;
+          if (dropdownValue != 'All') {
+            filterDocs = filterDocs.where((element) {
+              return element
+                  .get('Category')
+                  .toString()
+                  .toLowerCase()
+                  .contains(dropdownValue.toLowerCase());
+            }).toList();
+          }
+
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+            itemCount: filterDocs.length,
             itemBuilder: (BuildContext context, int index) {
-              final docData = snapshot.data!.docs[index].data() as Map;
+              final docData = filterDocs[index].data() as Map;
               return GestureDetector(
                 onTap: () {
                   setState(() {
