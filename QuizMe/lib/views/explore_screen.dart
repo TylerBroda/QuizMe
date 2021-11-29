@@ -21,14 +21,35 @@ class _ExploreScreenState extends State<ExploreScreen> {
   List<String> options = ['All', 'English', 'History', 'Math', 'Science'];
   String dropdownValue = 'All';
 
+  final _searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Explore"),
+        title: Container(
+          height: 35,
+          child: TextField(
+              controller: _searchController,
+              onChanged: (String? newValue) {
+                setState(() {
+                });
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Search',
+                prefixIcon: Icon(Icons.search, color: Colors.grey),
+                fillColor: Colors.white,
+                filled: true,
+                contentPadding: EdgeInsets.only(
+                  bottom: 35 / 2,  
+                )
+              ),
+            ),
+        ),
         actions: <Widget>[
           Container(
-            margin: EdgeInsets.only(top: 20, right: 5),
+            margin: const EdgeInsets.only(top: 20, right: 5),
             child: const Text(
               'Category:', 
               style: TextStyle(
@@ -102,6 +123,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   .toString()
                   .toLowerCase()
                   .contains(dropdownValue.toLowerCase());
+            }).toList();
+          }
+
+          //Filter quizzes by search value
+          if (_searchController.text != '') {
+            filterDocs = filterDocs.where((element) {
+              return element
+                  .get('Name')
+                  .toString()
+                  .toLowerCase()
+                  .startsWith(_searchController.text.toLowerCase());
             }).toList();
           }
 
