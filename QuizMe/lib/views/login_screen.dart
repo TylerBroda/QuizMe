@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 // @dart=2.9
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/app_colors.dart';
-import 'package:dbcrypt/dbcrypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -24,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   var userDB = FirebaseFirestore.instance.collection('users');
   String _Email;
   String _Password;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,6 +83,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (value == null || value.isEmpty) {
                             return "Missing email";
                           }
+                          if (!value.contains("@")) {
+                            return "invalid email";
+                          }
+                          if (value.contains(" ")) {
+                            return "invalid email, can't contain spaces";
+                          }
                           return null;
                         },
                         onSaved: (value) {
@@ -110,10 +119,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (value == null || value.isEmpty) {
                             return "Missing password";
                           }
+                          if (value.length < 7) {
+                            return 'Password must contain 7 characters';
+                          }
                           return null;
                         },
                         onSaved: (value) {
-                          _Email = value;
+                          _Password = value;
                         },
                       ),
                       SizedBox(
@@ -125,16 +137,41 @@ class _LoginScreenState extends State<LoginScreen> {
                                 QuizAppColors.mainColor),
                             minimumSize: MaterialStateProperty.all(
                                 Size(double.infinity, 35))),
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  duration: Duration(seconds: 1),
-                                  content: Text('Valid'),
-                                  backgroundColor: Colors.green),
-                            );
-                            print(_Email);
-                            print(_Password);
+                            _formKey.currentState.save();
+                            var userexists = false;
+                            var res = await userDB
+                                .where('Email', isEqualTo: _Email.toString())
+                                .get()
+                                .then((value) {
+                              value.docs.forEach((result) {
+                                if (result.get('Password') == _Password) {
+                                  userexists = true;
+                                }
+                              });
+                            });
+                            if (userexists == true) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    duration: Duration(seconds: 1),
+                                    content: Text(
+                                      "Login successful",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    backgroundColor: Colors.green),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    duration: Duration(seconds: 1),
+                                    content: Text(
+                                      "Invalid user doesn't exist",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    backgroundColor: Colors.red),
+                              );
+                            }
                           }
                         },
                         child: const Text('Sign In'),
@@ -166,9 +203,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  Stream<QuerySnapshot> getData() {
-    return userDB.snapshots();
   }
 }

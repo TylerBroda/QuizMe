@@ -152,13 +152,6 @@ class _SignupScreenState extends State<SignupScreen> {
                           if (value.length < 7) {
                             return 'Password must contain 7 characters';
                           }
-                          //TODO:
-                          /*
-                          if (validCharacters.allMatches(value) == false) {
-                            return 'no special characters';
-                          }
-                          */
-
                           return null;
                         },
                         onSaved: (value) {
