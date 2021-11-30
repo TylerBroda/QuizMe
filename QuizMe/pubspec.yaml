@@ -38,6 +38,8 @@ dependencies:
   dbcrypt: ^2.0.0
   firebase_core:
   cloud_firestore:
+  flutter_map:
+  latlong:
 
 dev_dependencies:
   flutter_test:

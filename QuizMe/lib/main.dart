@@ -5,6 +5,7 @@ import 'package:quizme/views/login_screen.dart';
 import 'package:quizme/views/signup_screen.dart';
 import 'package:quizme/views/quiz_picker.dart';
 import 'package:quizme/views/explore_screen.dart';
+import 'package:quizme/views/tutor_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
@@ -24,13 +25,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // change intialRoute while working on views
-      initialRoute: '/home',
+      initialRoute: '/tutors',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomePage(),
         '/explorescreen': (context) => const ExploreScreen(),
         '/quizpicker': (context) => const QuizPicker(),
+        '/tutors': (context) => const TutorScreen(),
       },
     );
   }
