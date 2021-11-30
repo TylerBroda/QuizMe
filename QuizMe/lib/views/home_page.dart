@@ -26,18 +26,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: views[_currentIndex],
-      // For Adding Quizzes
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InitializeQuiz()),
-                );
-              },
-              // label: const Text(''),
-              child: const Icon(Icons.add))
-          : Container(),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: [
