@@ -1,8 +1,5 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 // @dart=2.9
-import 'dart:async';
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
