@@ -35,14 +35,16 @@ class QuestionCreatorState extends State<QuestionCreator> {
   ];
 
   saveQuestion() {
-    print(questionNumber);
-    // List<Option> options = [];
+    List<Option> options = [];
 
-    // for (EditOption option in _editOptions) {
-    //   options = [...options, Option(option.controller.text, option.isAnswer)];
-    // }
+    for (EditOption editOption in _editOptions) {
+      options = [
+        ...options,
+        Option(editOption.controller.text, editOption.isAnswer)
+      ];
+    }
 
-    // callback(Question(questionController.text, options));
+    callback(Question(questionController.text, options));
   }
 
   @override

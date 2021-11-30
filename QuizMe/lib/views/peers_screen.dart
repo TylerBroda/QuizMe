@@ -17,11 +17,14 @@ class PeersScreen extends StatefulWidget {
 
 class _PeersScreenState extends State<PeersScreen> {
   var peersDB = FirebaseFirestore.instance.collection('peers');
-  String _selectedid = '';
+  String _mainDocID;
+  String _selectedID;
   int _selectedIndx = -1;
+
   @override
   void initState() {
     super.initState();
+    getdocid(widget.userloggedin);
   }
 
   @override
@@ -52,7 +55,7 @@ class _PeersScreenState extends State<PeersScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              addpeer("Liam_Neeson");
+              deleteUser(_selectedID);
             },
             icon: Icon(Icons.delete),
           ),
@@ -82,18 +85,19 @@ class _PeersScreenState extends State<PeersScreen> {
                                 leading: CircleAvatar(
                                   backgroundColor: Colors.brown,
                                   child: Text(
-                                    docData['peername'][0],
+                                    docData['name'][0],
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white),
                                   ),
                                 ),
                                 title: Text(
-                                  docData['peername'],
+                                  docData['name'],
                                 ),
                                 onTap: () async {
                                   setState(() {
                                     _selectedIndx = index;
+                                    _selectedID = docData.id;
                                   });
                                 }),
                           ],
@@ -104,36 +108,60 @@ class _PeersScreenState extends State<PeersScreen> {
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () async {
-            print("Pressed");
+            //Todo: Adding a validator for checking if the person exists in the db
+            addpeer("Liam_Neeson");
           }),
     );
   }
 
   Future<void> getdocid(String mainuser) async {
+    bool userdbexists = false;
     var res = await peersDB
         .where('mainuser', isEqualTo: mainuser.toString())
         .get()
         .then((value) {
       value.docs.forEach((result) {
         setState(() {
-          _selectedid = result.id;
+          userdbexists = true;
+          _mainDocID = result.id;
         });
       });
     });
+    print(userdbexists);
+    if (userdbexists == false) {
+      peersDB.add({
+        'mainuser': mainuser,
+      }).then((value) {
+        setState(() {
+          _mainDocID = value.id;
+          userdbexists = true;
+        });
+      }).catchError((error) => print("Failed to add user: $error"));
+    }
+  }
+
+  Future<void> deleteUser(String id) {
+    return peersDB
+        .doc(_mainDocID)
+        .collection('peernames')
+        .doc(id.toString())
+        .delete()
+        .then((value) => print("Peer Deleted"))
+        .catchError((error) => print("Failed to Delete Peer: $error"));
   }
 
   Future<void> addpeer(String peer) async {
     return peersDB
-        .doc(_selectedid.toString())
+        .doc(_mainDocID.toString())
         .collection('peernames')
         .add({
           'name': peer,
         })
-        .then((value) => print("User Added"))
-        .catchError((error) => print("Failed to add user: $error"));
+        .then((value) => print("Peer added"))
+        .catchError((error) => print("Failed to add Peer: $error"));
   }
 
   Stream<QuerySnapshot> getData() {
-    return peersDB.snapshots();
+    return peersDB.doc(_mainDocID).collection('peernames').snapshots();
   }
 }

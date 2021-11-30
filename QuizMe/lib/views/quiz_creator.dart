@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:quizme/utils/sample_data.dart';
 import './question_creator.dart';
 import '../model/quiz.dart';
 
@@ -8,23 +8,43 @@ List<GlobalKey<QuestionCreatorState>> globalKeys = [GlobalKey()];
 
 class QuizCreator extends StatefulWidget {
   const QuizCreator(
-      {Key? key, required this.questionNumber, required this.quizName})
+      {Key? key,
+      required this.questionNumber,
+      required this.topic,
+      required this.quizName,
+      required this.quizID})
       : super(key: key);
 
   final int questionNumber;
+  final String topic;
   final String quizName;
+  final String quizID;
 
   @override
   _QuizCreatorState createState() => _QuizCreatorState(
-      questionNumber: this.questionNumber, quizName: this.quizName);
+      questionNumber: this.questionNumber,
+      topic: this.topic,
+      quizName: this.quizName,
+      quizID: this.quizID);
 }
 
 class _QuizCreatorState extends State<QuizCreator> {
-  String quizName;
+  final CollectionReference _quizCollection =
+      FirebaseFirestore.instance.collection("quizzes");
+
   int questionNumber;
-  _QuizCreatorState({required this.questionNumber, required this.quizName});
+  String topic;
+  String quizName;
+  String quizID;
+
+  _QuizCreatorState(
+      {required this.questionNumber,
+      required this.topic,
+      required this.quizName,
+      required this.quizID});
 
   List<Widget> questionPages = [];
+  Quiz quiz = Quiz("", "", []);
 
   @override
   void initState() {
@@ -33,17 +53,34 @@ class _QuizCreatorState extends State<QuizCreator> {
       QuestionCreator(
           questionNumber: 1, callback: _callback, key: globalKeys[0])
     ];
+    quiz = Quiz(quizName, topic, []);
   }
 
-  _callback(Question question) {
-    // print(d);
+  _callback(Question newQuestion) {
+    quiz.questions = [...quiz.questions, newQuestion];
   }
 
   _saveQuiz() async {
-    for (Widget questionPage in questionPages) {
-      globalKeys[0].currentState?.saveQuestion();
+    quiz.questions = [];
+    for (int i = 0; i < questionPages.length; i++) {
+      await globalKeys[i].currentState?.saveQuestion();
     }
-    print(questionPages[0]);
+
+    var quizData = {
+      "Name": quizName,
+      "Category": topic,
+      // "Questions": quiz.questions,
+      "User": "Admin"
+    };
+
+    // If this is a brand new quiz, make a new one in the database and then stick to its new ID
+    // Otherwise update the chosen ID
+    if (quizID == "none") {
+      DocumentReference newQuiz = await _quizCollection.add(quizData);
+      quizID = newQuiz.id;
+    } else {
+      await _quizCollection.doc(quizID).update(quizData);
+    }
   }
 
   @override
@@ -117,77 +154,5 @@ class _QuizCreatorState extends State<QuizCreator> {
             onPressed: () {
               _saveQuiz();
             }));
-  }
-}
-
-class InitializeQuiz extends StatefulWidget {
-  const InitializeQuiz({Key? key}) : super(key: key);
-
-  @override
-  _InitializeQuizState createState() => _InitializeQuizState();
-}
-
-class _InitializeQuizState extends State<InitializeQuiz> {
-  final List<String> _items = ["Math", "Literature", "Science"];
-  String topic = "Science";
-
-  TextEditingController quizNameController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text("Create Quiz")),
-        resizeToAvoidBottomInset: false,
-        body: Center(
-            child: Container(
-                width: 350,
-                height: 300,
-                child: Card(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                          width: 300,
-                          child: TextFormField(
-                              decoration: const InputDecoration(
-                                  labelText: "Quiz Name",
-                                  icon: Icon(Icons.help)),
-                              controller: quizNameController)),
-                      Container(
-                          width: 300,
-                          child: DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                                labelText: 'Topic', icon: Icon(Icons.school)),
-                            isExpanded: true,
-                            value: topic,
-                            items: _items.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (String? value) {
-                              setState(() {
-                                topic = value!;
-                              });
-                            },
-                          )),
-                      ElevatedButton(
-                          onPressed: () {
-                            if (quizNameController.text.isNotEmpty &&
-                                topic.isNotEmpty) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => QuizCreator(
-                                        questionNumber: 1,
-                                        quizName: quizNameController.text)),
-                              );
-                            }
-                          },
-                          child: const Text("Continue"))
-                    ],
-                  ),
-                ))));
   }
 }
