@@ -29,7 +29,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String _Password = '';
   String _Username = '';
 
-  var userDB = FirebaseFirestore.instance.collection('Users');
+  var userDB = FirebaseFirestore.instance.collection('users');
 
   RegExp validPassword = RegExp(r'^[A-Za-z0-9]'); //for password
   RegExp validUsername = RegExp(r'^[A-Za-z_]'); //for username

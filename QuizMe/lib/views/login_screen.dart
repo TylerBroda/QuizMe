@@ -23,6 +23,8 @@ class _LoginScreenState extends State<LoginScreen> {
   var userDB = FirebaseFirestore.instance.collection('users');
   String _Email;
   String _Password;
+  var userexists = false;
+  var retusername;
 
   @override
   Widget build(BuildContext context) {
@@ -137,17 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () async {
                           if (_formKey.currentState.validate()) {
                             _formKey.currentState.save();
-                            var userexists = false;
-                            var res = await userDB
-                                .where('Email', isEqualTo: _Email.toString())
-                                .get()
-                                .then((value) {
-                              value.docs.forEach((result) {
-                                if (result.get('Password') == _Password) {
-                                  userexists = true;
-                                }
-                              });
-                            });
+                            checkUser(_Email, _Password);
                             if (userexists == true) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -158,12 +150,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     backgroundColor: Colors.green),
                               );
+                              //Todo: Pass the username of the person who logged in
+                              print(retusername);
+                              //for now just printing the username
+                              var result =
+                                  await Navigator.pushNamed(context, '/home');
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    duration: Duration(seconds: 1),
+                                    duration: Duration(seconds: 5),
                                     content: Text(
-                                      "Invalid user doesn't exist",
+                                      "The Email you entered does not exist. Please check that you have typed your Email and Password correctly.",
                                       textAlign: TextAlign.center,
                                     ),
                                     backgroundColor: Colors.red),
@@ -200,5 +197,21 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> checkUser(String email, String password) async {
+    var res = await userDB
+        .where('Email', isEqualTo: _Email.toString())
+        .get()
+        .then((value) {
+      value.docs.forEach((result) {
+        if (result.get('Password') == _Password) {
+          setState(() {
+            userexists = true;
+            retusername = result.get('Username');
+          });
+        }
+      });
+    });
   }
 }
