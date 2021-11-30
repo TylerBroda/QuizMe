@@ -22,6 +22,9 @@ class SignupScreen extends StatefulWidget {
 //Todo: Encrypt Password
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  var passwordController = TextEditingController();
+  var retypedPasswordController = TextEditingController();
+
   String _Email = '';
   String _Password = '';
   String _Username = '';
@@ -50,6 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
+                      // Email
                       TextFormField(
                         decoration: InputDecoration(
                           // change these colors if needed
@@ -85,6 +89,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           _Email = value;
                         },
                       ),
+
+                      // Username
                       TextFormField(
                         decoration: InputDecoration(
                           // change these colors if needed
@@ -125,7 +131,10 @@ class _SignupScreenState extends State<SignupScreen> {
                           _Username = value;
                         },
                       ),
+
+                      // Password
                       TextFormField(
+                        controller: passwordController,
                         decoration: InputDecoration(
                           // change these colors if needed
                           enabledBorder: UnderlineInputBorder(
@@ -152,12 +161,51 @@ class _SignupScreenState extends State<SignupScreen> {
                           if (value.length < 7) {
                             return 'Password must contain 7 characters';
                           }
+                          if (retypedPasswordController.text !=
+                              passwordController.text) {
+                            return "Passwords don't match";
+                          }
                           return null;
                         },
                         onSaved: (value) {
                           _Password = value;
                         },
                       ),
+
+                      // Re-enter password
+                      TextFormField(
+                        controller: retypedPasswordController,
+                        decoration: InputDecoration(
+                          // change these colors if needed
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Color(0x2F000000)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          labelText: 'Re-enter Password',
+                          labelStyle: TextStyle(
+                              color: QuizAppColors.mainColor,
+                              fontSize: 15,
+                              fontFamily: 'AvenirLight'),
+                        ),
+                        style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 15,
+                            fontFamily: 'AvenirLight'),
+                        obscureText: true,
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return "Missing password";
+                          }
+                          if (retypedPasswordController.text !=
+                              passwordController.text) {
+                            return "Passwords don't match";
+                          }
+                          return null;
+                        },
+                      ),
+
                       SizedBox(
                         height: 20,
                       ),
