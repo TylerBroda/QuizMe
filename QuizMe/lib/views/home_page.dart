@@ -1,9 +1,11 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:quizme/views/peers_screen.dart';
 import 'package:quizme/views/quiz_creator.dart';
 import 'package:quizme/views/quiz_picker.dart';
 import 'package:quizme/views/explore_screen.dart';
+import 'package:quizme/views/tutor_screen.dart';
 import 'package:quizme/widgets/app_drawer.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,18 +20,17 @@ class _HomePageState extends State<HomePage> {
   final views = [
     QuizCreator(),
     ExploreScreen(),
+    TutorScreen(),
+    PeersScreen()
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("temp appbar"),
-      ),
-      drawer: AppDrawer(),
       resizeToAvoidBottomInset: false,
       body: views[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
             label: "My Quizzes",
@@ -39,10 +40,14 @@ class _HomePageState extends State<HomePage> {
             label: "Explore",
             icon: Icon(Icons.explore),
           ),
-          // BottomNavigationBarItem(
-          //   label: "Tutors",
-          //   icon: Icon(Icons.school),
-          // ),
+          BottomNavigationBarItem(
+            label: "Tutors",
+            icon: Icon(Icons.school),
+          ),
+          BottomNavigationBarItem(
+            label: "Peers",
+            icon: Icon(Icons.people),
+          ),
         ],
         currentIndex: _currentIndex,
         onTap: (int index) {
