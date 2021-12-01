@@ -5,22 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/quiz.dart';
 
-// TODO: these classes are different from the ones in quiz.dart
-//       should use these
-class Question {
-  final String question;
-  final int correctOptionIndex;
-  final List<String> options;
+class QuizScreenArguments {
+  final String quizID;
 
-  Question(this.question, this.correctOptionIndex, this.options);
+  QuizScreenArguments(this.quizID);
 }
 
-class Quiz {
-  final String name;
-  final List<Question> questions;
-  final String user;
+class QuizScreen extends StatelessWidget {
+  const QuizScreen({Key? key}) : super(key: key);
 
-  Quiz(this.name, this.questions, this.user);
+  @override
+  Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as QuizScreenArguments;
+
+    return QuizGame(args.quizID);
+  }
 }
 
 class AnswerEntry {
@@ -62,7 +62,8 @@ class _QuizGameState extends State<QuizGame> {
     var quizDoc = await quizzes.doc(widget.quizID).get();
 
     String quizName = quizDoc['Name'];
-    String quizUser = quizDoc['User'];
+    String quizCategory = quizDoc['Category'];
+    // String quizUser = quizDoc['User'];
     List<Question> quizQuestions = quizDoc['Questions']
         .map<Question>((questionDoc) => Question(
             questionDoc['Question'],
@@ -71,7 +72,7 @@ class _QuizGameState extends State<QuizGame> {
         .toList();
 
     setState(() {
-      currentQuiz = Quiz(quizName, quizQuestions, quizUser);
+      currentQuiz = Quiz(quizName, quizCategory, quizQuestions);
       loadedQuiz = true;
     });
   }
@@ -99,7 +100,7 @@ class _QuizGameState extends State<QuizGame> {
                     ),
                     icon: Text('Done', style: TextStyle(color: Colors.white)),
                     onPressed: () {
-                      Navigator.pushNamed(context, '/home');
+                      Navigator.pop(context);
                     })
               ]),
           body: Container(padding: EdgeInsets.all(18.0), child: getQuizBody()));
@@ -130,8 +131,8 @@ class _QuizGameState extends State<QuizGame> {
             ],
           ),
           SizedBox(height: 24.0),
-          SizedBox(
-            height: 400,
+          Flexible(
+            // height: 400,
             child: ListView.builder(
                 itemCount: options.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -182,8 +183,13 @@ class _QuizGameState extends State<QuizGame> {
                 }),
           ),
           currentQuestionDone
-              ? GestureDetector(
-                  onTap: () {
+              ? ElevatedButton(
+                  style: ButtonStyle(
+                      foregroundColor: MaterialStateProperty.resolveWith(
+                          (states) => Colors.grey[900]),
+                      backgroundColor: MaterialStateProperty.resolveWith(
+                          (states) => Colors.white)),
+                  onPressed: () {
                     setState(() {
                       currentQuestionDone = false;
                       currentQuestionIndex++;

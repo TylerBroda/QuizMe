@@ -69,7 +69,14 @@ class _QuizCreatorState extends State<QuizCreator> {
     var quizData = {
       "Name": quizName,
       "Category": topic,
-      // "Questions": quiz.questions,
+      "Questions": quiz.questions
+          .map((question) => {
+                "Question": question.question,
+                "CorrectOptionIndex": question.correctOptionIndex,
+                "Options": question.options
+              })
+          .toList(),
+      // TODO: User should be replaced with actual user
       "User": "Admin"
     };
 
@@ -101,8 +108,9 @@ class _QuizCreatorState extends State<QuizCreator> {
                     color: Colors.white,
                   ),
                   icon: Text('Done', style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    _saveQuiz();
+                  onPressed: () async {
+                    await _saveQuiz();
+                    Navigator.pushNamed(context, '/home');
                   })
             ]),
         resizeToAvoidBottomInset: false,

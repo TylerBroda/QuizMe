@@ -34,7 +34,9 @@ class MyApp extends StatelessWidget {
         '/explorescreen': (context) => const ExploreScreen(),
         '/quizpicker': (context) => const QuizPicker(),
         '/tutors': (context) => const TutorScreen(),
-        '/quizgame': (context) => const QuizGame("F5imscFWxNedolS7W5QS"),
+        // to navigate to /quizgame:
+        // Navigator.pushNamed(context, '/quizgame', arguments: QuizScreenArguments(quizID));
+        '/quizgame': (context) => const QuizScreen(),
       },
     );
   }

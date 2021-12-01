@@ -3,9 +3,8 @@ import '../model/quiz.dart';
 
 class EditOption {
   TextEditingController controller;
-  bool isAnswer;
 
-  EditOption(this.controller, this.isAnswer);
+  EditOption(this.controller);
 }
 
 class QuestionCreator extends StatefulWidget {
@@ -23,6 +22,7 @@ class QuestionCreator extends StatefulWidget {
 
 class QuestionCreatorState extends State<QuestionCreator> {
   int questionNumber;
+  int correctOptionIndex = 0;
   final Function callback;
 
   QuestionCreatorState({required this.questionNumber, required this.callback});
@@ -30,21 +30,18 @@ class QuestionCreatorState extends State<QuestionCreator> {
   TextEditingController questionController = TextEditingController();
 
   List<EditOption> _editOptions = [
-    EditOption(TextEditingController(), true),
-    EditOption(TextEditingController(), false),
+    EditOption(TextEditingController()),
+    EditOption(TextEditingController()),
   ];
 
   saveQuestion() {
-    List<Option> options = [];
+    List<String> options = [];
 
     for (EditOption editOption in _editOptions) {
-      options = [
-        ...options,
-        Option(editOption.controller.text, editOption.isAnswer)
-      ];
+      options = [...options, editOption.controller.text];
     }
 
-    callback(Question(questionController.text, options));
+    callback(Question(questionController.text, correctOptionIndex, options));
   }
 
   @override
@@ -85,28 +82,30 @@ class QuestionCreatorState extends State<QuestionCreator> {
                             children: [
                               Radio(
                                 fillColor: MaterialStateColor.resolveWith(
-                                    (states) => _editOptions[index - 1].isAnswer
-                                        ? Colors.green
-                                        : Colors.red),
+                                    (states) =>
+                                        (index - 1 == correctOptionIndex)
+                                            ? Colors.green
+                                            : Colors.red),
                                 value: index - 1,
-                                groupValue: _editOptions[index - 1].isAnswer
+                                groupValue: (index - 1 == correctOptionIndex)
                                     ? index - 1
                                     : -1,
                                 onChanged: (value) {
                                   setState(() {
-                                    for (EditOption option in _editOptions) {
-                                      option.isAnswer = false;
-                                    }
-                                    _editOptions[index - 1].isAnswer = true;
+                                    correctOptionIndex = index - 1;
+                                    // for (EditOption option in _editOptions) {
+                                    //   option.isAnswer = false;
+                                    // }
+                                    // _editOptions[index - 1].isAnswer = true;
                                   });
                                 },
                               ),
                               Text(
-                                  _editOptions[index - 1].isAnswer
+                                  (index - 1 == correctOptionIndex)
                                       ? "Correct"
                                       : "Incorrect",
                                   style: TextStyle(
-                                      color: _editOptions[index - 1].isAnswer
+                                      color: (index - 1 == correctOptionIndex)
                                           ? Colors.green
                                           : Colors.red,
                                       fontSize: 12))
@@ -123,7 +122,7 @@ class QuestionCreatorState extends State<QuestionCreator> {
                                 setState(() {
                                   _editOptions = [
                                     ..._editOptions,
-                                    EditOption(TextEditingController(), false)
+                                    EditOption(TextEditingController())
                                   ];
                                 });
                               },

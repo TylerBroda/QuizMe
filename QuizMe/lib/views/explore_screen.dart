@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:quizme/views/quiz_game.dart';
 import 'package:quizme/widgets/app_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -29,33 +30,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
         title: Container(
           height: 35,
           child: TextField(
-              controller: _searchController,
-              onChanged: (String? newValue) {
-                setState(() {
-                });
-              },
-              decoration: const InputDecoration(
+            controller: _searchController,
+            onChanged: (String? newValue) {
+              setState(() {});
+            },
+            decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Search',
                 prefixIcon: Icon(Icons.search, color: Colors.grey),
                 fillColor: Colors.white,
                 filled: true,
                 contentPadding: EdgeInsets.only(
-                  bottom: 35 / 2,  
-                )
-              ),
-            ),
+                  bottom: 35 / 2,
+                )),
+          ),
         ),
         actions: <Widget>[
           Container(
-            margin: const EdgeInsets.only(top: 20, right: 5),
-            child: const Text(
-              'Category:', 
-              style: TextStyle(
-                fontWeight: FontWeight.bold
-              ),
-            )
-          ),
+              margin: const EdgeInsets.only(top: 20, right: 5),
+              child: const Text(
+                'Category:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )),
           ButtonTheme(
             alignedDropdown: true,
             child: DropdownButton<String>(
@@ -101,9 +97,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               }).toList(),
             ),
           ),
-          const SizedBox(
-            width: 20
-          )
+          const SizedBox(width: 20)
         ],
       ),
       drawer: const AppDrawer(),
@@ -137,30 +131,33 @@ class _ExploreScreenState extends State<ExploreScreen> {
           }
 
           return ListView.builder(
-            itemCount: filterDocs.length,
-            itemBuilder: (BuildContext context, int index) {
-              final docData = filterDocs[index].data() as Map;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = index;
-                    _docID = snapshot.data!.docs[index].id;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Card(
-                    color: (_selectedIndex == index) ? Colors.blue : Colors.white,
-                    child: ListTile(
-                      title: Text(docData['Name'].toString()),
-                      subtitle: Text(docData['User'].toString()),
-                      trailing: const Icon(Icons.arrow_forward),
-                    ),
-                  )
-                )
-              );
-            }
-          );
+              itemCount: filterDocs.length,
+              itemBuilder: (BuildContext context, int index) {
+                final docData = filterDocs[index].data() as Map;
+                return GestureDetector(
+                    onTap: () {
+                      String quizID = snapshot.data!.docs[index].id;
+                      print(quizID);
+                      Navigator.pushNamed(context, '/quizgame',
+                          arguments: QuizScreenArguments(quizID));
+                      // setState(() {
+                      //   _selectedIndex = index;
+                      //   _docID = snapshot.data!.docs[index].id;
+                      // });
+                    },
+                    child: Container(
+                        padding: const EdgeInsets.all(10),
+                        child: Card(
+                          color: (_selectedIndex == index)
+                              ? Colors.blue
+                              : Colors.white,
+                          child: ListTile(
+                            title: Text(docData['Name'].toString()),
+                            subtitle: Text(docData['User'].toString()),
+                            trailing: const Icon(Icons.arrow_forward),
+                          ),
+                        )));
+              });
         },
       ),
     );
