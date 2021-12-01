@@ -2,15 +2,16 @@ class Quiz {
   String name;
   String topic;
   List<Question> questions;
+  String user;
 
-  Quiz(this.name, this.topic, this.questions);
+  Quiz(this.name, this.topic, this.questions, this.user);
 
   // Returns sample quizzes
   static List<Quiz> generateData() {
     return [
-      Quiz('Math q', 'Math', []),
-      Quiz('Sci q', 'Science', []),
-      Quiz('Eng q', 'Literature', []),
+      Quiz('Math q', 'Math', [], 'Admin'),
+      Quiz('Sci q', 'Science', [], 'Admin'),
+      Quiz('Eng q', 'Literature', [], 'Admin'),
     ];
   }
 }

@@ -6,6 +6,7 @@ import 'package:quizme/views/signup_screen.dart';
 import 'package:quizme/views/quiz_picker.dart';
 import 'package:quizme/views/explore_screen.dart';
 import 'package:quizme/views/tutor_screen.dart';
+import 'package:quizme/views/quiz_game.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         '/explorescreen': (context) => const ExploreScreen(),
         '/quizpicker': (context) => const QuizPicker(),
         '/tutors': (context) => const TutorScreen(),
+        '/quizgame': (context) => const QuizGame("F5imscFWxNedolS7W5QS"),
       },
     );
   }
