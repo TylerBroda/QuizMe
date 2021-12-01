@@ -115,7 +115,6 @@ class _QuizGameState extends State<QuizGame> {
       List<String> options = currentQuestion.options;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             children: [
@@ -132,7 +131,7 @@ class _QuizGameState extends State<QuizGame> {
           ),
           SizedBox(height: 24.0),
           Flexible(
-            // height: 400,
+              child: Container(
             child: ListView.builder(
                 itemCount: options.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -181,7 +180,7 @@ class _QuizGameState extends State<QuizGame> {
                     ],
                   );
                 }),
-          ),
+          )),
           currentQuestionDone
               ? ElevatedButton(
                   style: ButtonStyle(
@@ -228,6 +227,7 @@ class _QuizGameState extends State<QuizGame> {
           onTapHandler();
         },
         child: AnimatedContainer(
+            margin: EdgeInsets.all(2.0),
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
                 color: color,
