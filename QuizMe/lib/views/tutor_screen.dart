@@ -77,10 +77,12 @@ class _TutorScreenState extends State<TutorScreen> {
                               e.data()['Email'],
                               e.data()['Address'],
                               e.data()['Subject'],
+                              e.data()['Contact'],
+                              e.data()['Description'],
                               e.data()['Price']);
                         });
                   },
-                  icon: Icon(Icons.location_on),
+                  icon: const Icon(Icons.location_on),
                   iconSize: 30.0,
                   color: Colors.blueAccent,
                 );
@@ -98,28 +100,108 @@ class _TutorScreenState extends State<TutorScreen> {
   }
 }
 
-Widget bottomSheet(
-    String name, String email, String address, String subject, String price) {
+Widget bottomSheet(String name, String email, String address, String subject, String contact, String description, String price) {
   return Column(
-    children: [
-      Container(
-        height: 100,
-        color: Colors.blueAccent,
-        child: ListTile(
-          title: Text(
-            "$name - $email",
-            style: TextStyle(color: Colors.white, fontSize: 20.0),
-          ),
-          subtitle: Text(
-            "$address",
-            style: TextStyle(color: Colors.white70, fontSize: 14.0),
-          ),
-          trailing: Text(
-            "$subject - $price",
-            style: TextStyle(color: Colors.white, fontSize: 16.0),
-          ),
-        ),
-      ),
-    ],
-  );
+          children: [
+            Container(
+              height: 80,
+              color: Colors.blueAccent,
+              child: ListTile(
+                title: Text(
+                  '$name',
+                  style: const TextStyle(color: Colors.white, fontSize: 20.0),
+                ),
+                subtitle: Text(
+                  '$subject',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14.0),
+                ),
+                trailing: Text(
+                  '$price',
+                  style: const TextStyle(color: Colors.white, fontSize: 20.0),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 250,
+                  child: ListTile(
+                    title: FittedBox(
+                      child: Text('$contact')
+                    ),
+                    leading: const Icon(
+                      Icons.call,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(
+              thickness: 1.5,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: ListTile(
+                    title: FittedBox(child: Text('$email')),
+                    leading: const Icon(
+                      Icons.mail,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(
+              thickness: 1.5,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ListTile(
+                    title: FittedBox(child: Text('$address')),
+                    leading: const Icon(
+                      Icons.location_on,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(
+              thickness: 1.5,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'About:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 2, right: 8),
+                  child: SizedBox(
+                    width: 320,
+                    child: Text(
+                      '$description',
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        );
 }
