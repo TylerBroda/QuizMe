@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quizme/utils/categories.dart';
 import './quiz_creator.dart';
 
 class InitializeQuiz extends StatefulWidget {
@@ -9,8 +10,8 @@ class InitializeQuiz extends StatefulWidget {
 }
 
 class _InitializeQuizState extends State<InitializeQuiz> {
-  final List<String> _items = ["Math", "Literature", "Science"];
-  String topic = "Science";
+  final List<String> _items = CATEGORIES;
+  String topic = CATEGORIES[0];
 
   TextEditingController quizNameController = TextEditingController();
 
