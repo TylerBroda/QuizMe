@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:quizme/model/db_user.dart';
+import 'package:quizme/utils/auth.dart';
 import './question_creator.dart';
 import '../model/quiz.dart';
 
@@ -66,6 +68,8 @@ class _QuizCreatorState extends State<QuizCreator> {
       await globalKeys[i].currentState?.saveQuestion();
     }
 
+    DBUser? user = await getAuthedUser();
+
     var quizData = {
       "Name": quizName,
       "Category": topic,
@@ -76,8 +80,7 @@ class _QuizCreatorState extends State<QuizCreator> {
                 "Options": question.options
               })
           .toList(),
-      // TODO: User should be replaced with actual user
-      "User": "Admin"
+      "User": user?.username
     };
 
     // If this is a brand new quiz, make a new one in the database and then stick to its new ID

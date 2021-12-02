@@ -1,8 +1,20 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:quizme/utils/auth.dart';
 import 'package:quizme/views/initialize_quiz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../model/quiz.dart';
+import '../model/db_user.dart';
+
+class QuizInfo {
+  String quizID;
+  String name;
+  String topic;
+
+  QuizInfo(this.quizID, this.name, this.topic);
+}
 
 class MyQuizzes extends StatefulWidget {
   const MyQuizzes({Key? key}) : super(key: key);
@@ -14,37 +26,28 @@ class MyQuizzes extends StatefulWidget {
 // Will list your quizzes that you made
 
 class _MyQuizzesState extends State<MyQuizzes> {
-  final List<Quiz> _quizzes = Quiz.generateData();
+  late List<QuizInfo> _quizzes;
+  bool loadedQuizzes = false;
   int _selectedIndex = -1;
+
+  var userDB = FirebaseFirestore.instance.collection('users');
+  var quizzesDB = FirebaseFirestore.instance.collection('quizzes');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("My Quizzes")),
-        body: _quizzes.isNotEmpty
-            ? ListView.builder(
-                itemCount: _quizzes.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                      },
-                      child: Container(
-                          decoration: new BoxDecoration(
-                              color: index == _selectedIndex
-                                  ? Colors.blue.shade100
-                                  : Colors.white10,
-                              border: Border(
-                                  bottom: new BorderSide(
-                                      color: Colors.grey.shade300))),
-                          child: ListTile(
-                            title: Text(_quizzes[index].name),
-                            subtitle: Text(_quizzes[index].topic),
-                          )));
-                })
-            : Center(child: Text("No quizzes made yet.")),
+        appBar: AppBar(
+          title: const Text("My Quizzes"),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  showLogoutConfirmation(context);
+                },
+                icon: const Icon(Icons.directions_run)),
+          ],
+        ),
+        body: getMyQuizzesBody(),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
               Navigator.push(
@@ -66,5 +69,85 @@ class _MyQuizzesState extends State<MyQuizzes> {
     //     )
     //   ],
     // );
+  }
+
+  void loadQuizzes() async {
+    DBUser? user = await getAuthedUser();
+    if (user != null) {
+      var ownQuizzesSnapshot =
+          await quizzesDB.where("User", isEqualTo: user.username).get();
+
+      setState(() {
+        _quizzes = ownQuizzesSnapshot.docs.map((doc) {
+          var quizData = doc.data();
+          return QuizInfo(doc.id, quizData['Name'], quizData['Category']);
+        }).toList();
+        loadedQuizzes = true;
+      });
+    }
+  }
+
+  Widget getMyQuizzesBody() {
+    if (!loadedQuizzes) {
+      loadQuizzes();
+      return Center(child: CircularProgressIndicator());
+    } else {
+      if (_quizzes.isNotEmpty) {
+        return ListView.builder(
+            itemCount: _quizzes.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  child: Container(
+                      decoration: new BoxDecoration(
+                          color: index == _selectedIndex
+                              ? Colors.blue.shade100
+                              : Colors.white10,
+                          border: Border(
+                              bottom:
+                                  new BorderSide(color: Colors.grey.shade300))),
+                      child: ListTile(
+                        title: Text(_quizzes[index].name),
+                        subtitle: Text(_quizzes[index].topic),
+                      )));
+            });
+      } else {
+        return Center(child: Text("No quizzes made yet."));
+      }
+    }
+  }
+
+  showLogoutConfirmation(BuildContext context) {
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    Widget confirmButton = TextButton(
+      child: Text("Log out"),
+      onPressed: () async {
+        await FirebaseAuth.instance.signOut();
+        Navigator.pushNamed(context, '/login');
+      },
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Log out?"),
+          content: Text("Are you sure you want to log out?"),
+          actions: [
+            cancelButton,
+            confirmButton,
+          ],
+        );
+      },
+    );
   }
 }

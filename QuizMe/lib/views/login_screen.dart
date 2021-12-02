@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:quizme/utils/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key key}) : super(key: key);
@@ -23,8 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
   var userDB = FirebaseFirestore.instance.collection('users');
   String _Email;
   String _Password;
-  var userexists = false;
-  var retusername;
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () async {
                           if (_formKey.currentState.validate()) {
                             _formKey.currentState.save();
-                            checkUser(_Email, _Password);
-                            if (userexists == true) {
+                            bool success = await checkUser(_Email, _Password);
+                            if (success) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     duration: Duration(seconds: 1),
@@ -150,12 +149,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     backgroundColor: Colors.green),
                               );
-                              //Todo: Pass the username of the person who logged in
-                              print(retusername);
-                              //for now just printing the username
                               var result =
                                   await Navigator.pushNamed(context, '/home');
                             } else {
+                              print("validation failed");
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     duration: Duration(seconds: 5),
@@ -199,19 +196,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> checkUser(String email, String password) async {
-    var res = await userDB
-        .where('Email', isEqualTo: _Email.toString())
-        .get()
-        .then((value) {
-      value.docs.forEach((result) {
-        if (result.get('Password') == _Password) {
-          setState(() {
-            userexists = true;
-            retusername = result.get('Username');
-          });
-        }
-      });
-    });
+  Future<bool> checkUser(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      return true;
+    } on FirebaseAuthException catch (e) {}
+
+    return false;
   }
 }

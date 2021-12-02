@@ -8,6 +8,7 @@ import 'package:quizme/views/explore_screen.dart';
 import 'package:quizme/views/tutor_screen.dart';
 import 'package:quizme/views/quiz_game.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +27,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // change intialRoute while working on views
-      initialRoute: '/home',
+      // initialRoute: '/login',
+      initialRoute:
+          (FirebaseAuth.instance.currentUser != null) ? '/home' : '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),

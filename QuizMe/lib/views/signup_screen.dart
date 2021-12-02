@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key key}) : super(key: key);
@@ -18,8 +18,6 @@ class SignupScreen extends StatefulWidget {
 // adjust color hex code
 // adjust underline color
 
-//pass the username to to other pages and store info under username
-//Todo: Encrypt Password
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   var passwordController = TextEditingController();
@@ -124,7 +122,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           if (validUsername.allMatches(value) == false) {
                             return "username can't contain special characters";
                           }
-                          //Todo: validator check if the same username already exists
+
                           return null;
                         },
                         onSaved: (value) {
@@ -218,18 +216,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         onPressed: () async {
                           if (_formKey.currentState.validate()) {
                             _formKey.currentState.save();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  duration: Duration(seconds: 1),
-                                  content: Text('Valid'),
-                                  backgroundColor: Colors.green),
-                            );
                             addUser(_Email, _Username, _Password);
                             print(_Email);
                             print(_Password);
                             print(_Username);
-                            Navigator.pop(context);
-                            //goes back to login page
                           }
                         },
                         child: const Text('Continue'),
@@ -260,10 +250,66 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Future<void> addUser(String email, String username, String password) {
-    return userDB
-        .add({'Email': email, 'Username': username, 'Password': password})
-        .then((value) => print("User Added"))
-        .catchError((error) => print("Failed to add user: $error"));
+  void addUser(String email, String username, String password) async {
+    var usersSnapshot =
+        await userDB.where('Username', isEqualTo: username).get();
+
+    if (usersSnapshot.size > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              "An account with that username already exists.",
+              textAlign: TextAlign.start,
+            ),
+            backgroundColor: Colors.red),
+      );
+      return;
+    } else {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: email, password: password);
+
+        userDB.add({
+          'Email': email,
+          'Username': username,
+          'UID': userCredential.user.uid
+        }).then((value) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                duration: Duration(seconds: 1),
+                content: Text(
+                  "Account successfully created.",
+                  textAlign: TextAlign.start,
+                ),
+                backgroundColor: Colors.green),
+          );
+
+          Navigator.pushNamed(context, '/home');
+        });
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'email-already-in-use') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                duration: Duration(seconds: 5),
+                content: Text(
+                  "An account with that e-mail already exists.",
+                  textAlign: TextAlign.start,
+                ),
+                backgroundColor: Colors.red),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                duration: Duration(seconds: 5),
+                content: Text(
+                  "Account could not be created.",
+                  textAlign: TextAlign.start,
+                ),
+                backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
   }
 }

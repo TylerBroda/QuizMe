@@ -37,6 +37,7 @@ dependencies:
   percent_indicator:
   dbcrypt: ^2.0.0
   firebase_core:
+  firebase_auth:
   cloud_firestore:
   flutter_map:
   latlong:

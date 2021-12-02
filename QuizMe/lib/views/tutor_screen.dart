@@ -33,7 +33,8 @@ class _TutorScreenState extends State<TutorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Tutors")),
+      appBar:
+          AppBar(title: const Text("Tutors"), automaticallyImplyLeading: false),
       body: StreamBuilder(
           stream: api.snapshots(),
           builder:
@@ -100,108 +101,105 @@ class _TutorScreenState extends State<TutorScreen> {
   }
 }
 
-Widget bottomSheet(String name, String email, String address, String subject, String contact, String description, String price) {
+Widget bottomSheet(String name, String email, String address, String subject,
+    String contact, String description, String price) {
   return Column(
-          children: [
-            Container(
-              height: 80,
-              color: Colors.blueAccent,
-              child: ListTile(
-                title: Text(
-                  '$name',
-                  style: const TextStyle(color: Colors.white, fontSize: 20.0),
-                ),
-                subtitle: Text(
-                  '$subject',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14.0),
-                ),
-                trailing: Text(
-                  '$price',
-                  style: const TextStyle(color: Colors.white, fontSize: 20.0),
-                ),
+    children: [
+      Container(
+        height: 80,
+        color: Colors.blueAccent,
+        child: ListTile(
+          title: Text(
+            '$name',
+            style: const TextStyle(color: Colors.white, fontSize: 20.0),
+          ),
+          subtitle: Text(
+            '$subject',
+            style: const TextStyle(color: Colors.white70, fontSize: 14.0),
+          ),
+          trailing: Text(
+            '$price',
+            style: const TextStyle(color: Colors.white, fontSize: 20.0),
+          ),
+        ),
+      ),
+      const SizedBox(
+        height: 10.0,
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 250,
+            child: ListTile(
+              title: FittedBox(child: Text('$contact')),
+              leading: const Icon(
+                Icons.call,
+                color: Colors.blueAccent,
               ),
             ),
-            const SizedBox(
-              height: 10.0,
+          ),
+        ],
+      ),
+      const Divider(
+        thickness: 1.5,
+      ),
+      Row(
+        children: [
+          SizedBox(
+            width: 300,
+            child: ListTile(
+              title: FittedBox(child: Text('$email')),
+              leading: const Icon(
+                Icons.mail,
+                color: Colors.blueAccent,
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 250,
-                  child: ListTile(
-                    title: FittedBox(
-                      child: Text('$contact')
-                    ),
-                    leading: const Icon(
-                      Icons.call,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ),
-              ],
+          ),
+        ],
+      ),
+      const Divider(
+        thickness: 1.5,
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ListTile(
+              title: FittedBox(child: Text('$address')),
+              leading: const Icon(
+                Icons.location_on,
+                color: Colors.blueAccent,
+              ),
             ),
-            const Divider(
-              thickness: 1.5,
+          ),
+        ],
+      ),
+      const Divider(
+        thickness: 1.5,
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'About:',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Row(
-              children: [
-                SizedBox(
-                  width: 300,
-                  child: ListTile(
-                    title: FittedBox(child: Text('$email')),
-                    leading: const Icon(
-                      Icons.mail,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ),
-              ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 2, right: 8),
+            child: SizedBox(
+              width: 320,
+              child: Text(
+                '$description',
+                textAlign: TextAlign.left,
+              ),
             ),
-            const Divider(
-              thickness: 1.5,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ListTile(
-                    title: FittedBox(child: Text('$address')),
-                    leading: const Icon(
-                      Icons.location_on,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(
-              thickness: 1.5,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'About:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 2, right: 8),
-                  child: SizedBox(
-                    width: 320,
-                    child: Text(
-                      '$description',
-                      textAlign: TextAlign.left,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
-        );
+          ),
+        ],
+      )
+    ],
+  );
 }
