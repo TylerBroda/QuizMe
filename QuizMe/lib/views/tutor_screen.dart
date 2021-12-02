@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class TutorScreen extends StatefulWidget {
   const TutorScreen({Key? key}) : super(key: key);
@@ -17,7 +20,15 @@ class _TutorScreenState extends State<TutorScreen> {
 
   List<Marker> tutors = [];
 
-  final center = LatLng(43.9455, -78.8968); //For testing map
+  final center = LatLng(43.9455, -78.8968); //For testing map: Ontario Tech
+  //final center = LatLng(37.4219873, -122.0839954); //For testing map: Amphitheatre Pkwy
+
+  Geolocator geolocator = Geolocator();
+  String _currentLocation = '';
+  String _address = '';
+  String _phoneNum = '';
+  String _price = '';
+  double lat = 0.0, long = 0.0;
 
   final _formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
@@ -37,10 +48,12 @@ class _TutorScreenState extends State<TutorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _checkPermissions();
     return Scaffold(
       appBar:
           AppBar(title: const Text("Tutors"), automaticallyImplyLeading: false),
       body: FlutterMap(
+              //TODO: Initalize map with phones geolocation
               options: MapOptions(
                   zoom: 15.0, center: center, minZoom: 5, maxZoom: 20),
               layers: [
@@ -53,10 +66,19 @@ class _TutorScreenState extends State<TutorScreen> {
                 MarkerLayerOptions(markers: tutors),
               ],
             ),
-      //TODO: Add geolocation for uploading tutor markers
       floatingActionButton:
           FloatingActionButton(
-            onPressed: () {
+            onPressed: () async {
+              //Retrieving location & address
+              var position = await _checkPermissions();
+                          setState(() {
+                            _currentLocation =
+                                "Position(${position.latitude}, ${position.longitude})";
+                            lat = position.latitude;
+                            long = position.longitude;
+                          });
+              getAddress(lat, long);
+
               showDialog(
                 context: context, 
                 builder: (BuildContext context) {
@@ -115,12 +137,12 @@ class _TutorScreenState extends State<TutorScreen> {
                                   TextFormField(
                                     controller: priceController,
                                     validator: (value) {
-                                      //TODO: Pricing info validation
                                       if (value == null || value.isEmpty) {
-                                        return 'Please enter pricing information';
+                                        return 'Please enter pricing';
                                       }
                                       return null;
                                     },
+                                    keyboardType: TextInputType.number,
                                     decoration: const InputDecoration(
                                       icon: Icon(Icons.money),
                                       labelText: 'Price *',
@@ -135,13 +157,17 @@ class _TutorScreenState extends State<TutorScreen> {
                                 children: [
                                   TextFormField(
                                     controller: phoneController,
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     validator: (value) {
-                                      //TODO: Phone number format validation
                                       if (value == null || value.isEmpty) {
                                         return 'Please enter a phone number';
                                       }
+                                      else if (value.length != 10) {
+                                        return 'Number must be 10 digits long';
+                                      }
                                       return null;
                                     },
+                                    keyboardType: TextInputType.number,
                                     decoration: const InputDecoration(
                                       icon: Icon(Icons.phone),
                                       labelText: 'Phone Number *',
@@ -178,26 +204,6 @@ class _TutorScreenState extends State<TutorScreen> {
                               child: Column(
                                 children: [
                                   TextFormField(
-                                    controller: addressController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter an address';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.home),
-                                      labelText: 'Address *',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  TextFormField(
                                     controller: descriptionController,
                                     decoration: const InputDecoration(
                                       icon: Icon(Icons.info_outline),
@@ -213,25 +219,34 @@ class _TutorScreenState extends State<TutorScreen> {
                     ),
                     actions: [
                       OutlinedButton(
+                        //TODO: Refresh map to display new marker once submitted
                         onPressed: () async {
-                          //TODO: Submit geolocation info to firebase,
-
                           if (_formKey.currentState!.validate()) {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Submitting Marker...')),
                             );
 
+                            _price = 
+                              '\$' + priceController.text.replaceAll(' ', '').replaceAll('-', '') + '/hr';
+
+                            _phoneNum = 
+                              '(' + phoneController.text.substring(0,3) + ')' 
+                              + ' ' + phoneController.text.substring(3,6) + ' - ' + phoneController.text.substring(6,10);
+
                             Map<String, dynamic> insertRow = {
                               "Name": nameController.text,
                               "Subject": subjectController.text,
-                              "Price": priceController.text,
-                              "Contact": phoneController.text,
+                              "Price": _price,
+                              "Contact": _phoneNum,
                               "Email": emailController.text,
-                              "Address": addressController.text,
-                              "Description": descriptionController.text
+                              "Address": _address,
+                              "Description": descriptionController.text,
+                              "Location": GeoPoint(lat, long)
                             };
                             await tutorData.add(insertRow);
+
+                            setState(() {});
                           }
                         }, 
                         child: const Text(
@@ -295,6 +310,26 @@ class _TutorScreenState extends State<TutorScreen> {
 
     return;
   }
+
+  Future<Position> _checkPermissions() async {
+    LocationPermission permission;
+
+    permission = await Geolocator.checkPermission();
+
+    Geolocator.requestPermission();
+
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best);
+	}
+
+  getAddress(double latitude, double longitude) async {
+    List<Placemark> places =
+        await placemarkFromCoordinates(latitude, longitude);
+
+    _address =
+        "${places.first.street}, ${places.first.locality}, ${places.first.country}, ${places.first.postalCode}";
+	}
+
 }
 
 Widget bottomSheet(String name, String email, String address, String subject,
