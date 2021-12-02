@@ -266,39 +266,37 @@ class _QuizGameState extends State<QuizGame> {
   }
 
   Widget getResultsBody() {
-    return ListView(
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(height: 8.0),
-          Center(
-              child: Text("Results",
-                  style: const TextStyle(
-                      fontSize: 40.0, fontWeight: FontWeight.bold))),
-          SizedBox(height: 16.0),
-          Center(child: getScoreBox()),
-          SizedBox(height: 24.0),
-          Text("Your Answers",
-              style:
-                  const TextStyle(fontSize: 21.0, fontWeight: FontWeight.bold)),
-          SizedBox(height: 8.0),
-          ...answers
-              .map((answerEntry) => Column(
-                    children: [
-                      getAnswerEntryWidget(answerEntry),
-                      SizedBox(height: 8.0)
-                    ],
-                  ))
-              .toList()
-          // Container(height: 20.0, child: getResultText())
-        ]);
+    return ListView(children: [
+      SizedBox(height: 8.0),
+      Center(
+          child: Text("Results",
+              style: const TextStyle(
+                  fontSize: 40.0, fontWeight: FontWeight.bold))),
+      SizedBox(height: 16.0),
+      Center(child: getScoreBox()),
+      SizedBox(height: 24.0),
+      Text("Your Answers",
+          style: const TextStyle(fontSize: 21.0, fontWeight: FontWeight.bold)),
+      SizedBox(height: 8.0),
+      ListView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: answers.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                getAnswerEntryWidget(answers[index]),
+                SizedBox(height: 8.0)
+              ],
+            );
+          }),
+    ]);
   }
 
   Widget getAnswerEntryWidget(AnswerEntry answerEntry) {
     return Container(
-      // padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
       decoration: BoxDecoration(
           color: Colors.white,
-          // border: Border.all(color: Colors.grey, width: 0.0),
           boxShadow: [
             BoxShadow(
                 color: Colors.grey.shade400,

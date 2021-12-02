@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:quizme/utils/categories.dart';
 import 'package:quizme/views/quiz_game.dart';
 import 'package:quizme/widgets/app_drawer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,7 +19,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   int _selectedIndex = -1;
   String _docID = '';
 
-  List<String> options = ['All', 'English', 'History', 'Math', 'Science'];
+  List<String> options = ['All', ...CATEGORIES];
   String dropdownValue = 'All';
 
   final _searchController = TextEditingController();

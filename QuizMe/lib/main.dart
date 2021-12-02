@@ -11,7 +11,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -37,12 +36,10 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomePage(),
+        '/quizgame': (context) => const QuizScreen(),
         // '/explorescreen': (context) => const ExploreScreen(),
         // '/quizpicker': (context) => const QuizPicker(),
         // '/tutors': (context) => const TutorScreen(),
-        // to navigate to /quizgame:
-        // Navigator.pushNamed(context, '/quizgame', arguments: QuizScreenArguments(quizID));
-        // '/quizgame': (context) => const QuizScreen(),
       },
     );
   }
