@@ -5,6 +5,7 @@ import 'package:quizme/utils/auth.dart';
 import 'package:quizme/views/initialize_quiz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quizme/views/question_list.dart';
 import '../model/quiz.dart';
 import '../model/db_user.dart';
 
@@ -97,16 +98,30 @@ class _MyQuizzesState extends State<MyQuizzes> {
             itemCount: _quizzes.length,
             itemBuilder: (context, index) {
               return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
+                  onTap: () async {
+                    var chosenQuizSnapshot =
+                        await quizzesDB.doc(_quizzes[index].quizID).get();
+
+                    Quiz chosenQuiz = Quiz(
+                        chosenQuizSnapshot['Name'],
+                        chosenQuizSnapshot['Category'],
+                        chosenQuizSnapshot['Questions']
+                            .map<Question>((questionDoc) => Question(
+                                questionDoc['Question'],
+                                questionDoc['CorrectOptionIndex'],
+                                questionDoc['Options'].cast<String>()))
+                            .toList());
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => QuestionList(
+                              chosenQuiz: chosenQuiz,
+                              quizID: _quizzes[index].quizID)),
+                    );
                   },
                   child: Container(
                       decoration: new BoxDecoration(
-                          color: index == _selectedIndex
-                              ? Colors.blue.shade100
-                              : Colors.white10,
                           border: Border(
                               bottom:
                                   new BorderSide(color: Colors.grey.shade300))),
