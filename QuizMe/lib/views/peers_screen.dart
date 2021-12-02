@@ -1,15 +1,11 @@
 // @dart=2.9
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:quizme/utils/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:quizme/utils/auth.dart';
+import 'package:quizme/model/db_user.dart';
 
 class PeersScreen extends StatefulWidget {
-  PeersScreen({Key key, this.userloggedin = 'Admin_User'}) : super(key: key);
-  //change the userloggedin
-  String userloggedin;
+  const PeersScreen({Key key}) : super(key: key);
 
   @override
   _PeersScreenState createState() => _PeersScreenState();
@@ -17,6 +13,7 @@ class PeersScreen extends StatefulWidget {
 
 class _PeersScreenState extends State<PeersScreen> {
   var peersDB = FirebaseFirestore.instance.collection('peers');
+  String mainuser = "Admin";
   String _mainDocID;
   String _selectedID;
   int _selectedIndx = -1;
@@ -24,7 +21,7 @@ class _PeersScreenState extends State<PeersScreen> {
   @override
   void initState() {
     super.initState();
-    getdocid(widget.userloggedin);
+    getdocid();
   }
 
   @override
@@ -38,7 +35,7 @@ class _PeersScreenState extends State<PeersScreen> {
             CircleAvatar(
               backgroundColor: Colors.brown,
               child: Text(
-                widget.userloggedin[0],
+                mainuser[0].toUpperCase(),
                 style:
                     TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
               ),
@@ -115,7 +112,15 @@ class _PeersScreenState extends State<PeersScreen> {
     );
   }
 
-  Future<void> getdocid(String mainuser) async {
+  Future<void> getdocid() async {
+    DBUser user = await getAuthedUser();
+
+    if (user != null) {
+      setState(() {
+        mainuser = user.username;
+      });
+    }
+
     bool userdbexists = false;
     var res = await peersDB
         .where('mainuser', isEqualTo: mainuser.toString())
@@ -128,6 +133,7 @@ class _PeersScreenState extends State<PeersScreen> {
         });
       });
     });
+
     print(userdbexists);
     if (userdbexists == false) {
       peersDB.add({
