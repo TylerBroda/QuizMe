@@ -150,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     backgroundColor: Colors.green),
                               );
                               var result =
-                                  await Navigator.pushNamed(context, '/home');
+                                  await Navigator.pushReplacementNamed(context, '/home');
                             } else {
                               print("validation failed");
                               ScaffoldMessenger.of(context).showSnackBar(

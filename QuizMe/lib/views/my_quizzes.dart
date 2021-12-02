@@ -132,7 +132,7 @@ class _MyQuizzesState extends State<MyQuizzes> {
       child: Text("Log out"),
       onPressed: () async {
         await FirebaseAuth.instance.signOut();
-        Navigator.pushNamed(context, '/login');
+        Navigator.pushReplacementNamed(context, '/login');
       },
     );
 

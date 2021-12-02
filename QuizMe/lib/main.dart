@@ -9,10 +9,13 @@ import 'package:quizme/views/tutor_screen.dart';
 import 'package:quizme/views/quiz_game.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() async {
+
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await dotenv.load(fileName: ".env");
   runApp(MyApp());
 }
 
@@ -34,12 +37,12 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const HomePage(),
-        '/explorescreen': (context) => const ExploreScreen(),
-        '/quizpicker': (context) => const QuizPicker(),
-        '/tutors': (context) => const TutorScreen(),
+        // '/explorescreen': (context) => const ExploreScreen(),
+        // '/quizpicker': (context) => const QuizPicker(),
+        // '/tutors': (context) => const TutorScreen(),
         // to navigate to /quizgame:
         // Navigator.pushNamed(context, '/quizgame', arguments: QuizScreenArguments(quizID));
-        '/quizgame': (context) => const QuizScreen(),
+        // '/quizgame': (context) => const QuizScreen(),
       },
     );
   }

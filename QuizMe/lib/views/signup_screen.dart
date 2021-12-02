@@ -285,7 +285,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 backgroundColor: Colors.green),
           );
 
-          Navigator.pushNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/home');
         });
       } on FirebaseAuthException catch (e) {
         if (e.code == 'email-already-in-use') {

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class TutorScreen extends StatefulWidget {
   const TutorScreen({Key? key}) : super(key: key);
@@ -13,10 +14,7 @@ class TutorScreen extends StatefulWidget {
 
 class _TutorScreenState extends State<TutorScreen> {
   final api = FirebaseFirestore.instance.collection('api');
-  List<DocumentSnapshot> apiDocs = [];
-  late Map<dynamic, dynamic> apiData;
 
-  final tutorData = FirebaseFirestore.instance.collection('tutors');
   List<Marker> tutors = [];
 
   final center = LatLng(43.9455, -78.8968); //For testing map
@@ -25,9 +23,7 @@ class _TutorScreenState extends State<TutorScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    setState(() {
-      getTutors().whenComplete(() => null);
-    });
+    getTutors().whenComplete(() => null);
   }
 
   @override
@@ -40,16 +36,14 @@ class _TutorScreenState extends State<TutorScreen> {
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (!snapshot.hasData) return const Text("Loading Map...");
-            apiDocs = snapshot.data!.docs;
-            apiData = apiDocs[0].data() as Map;
             return FlutterMap(
               options: MapOptions(
                   zoom: 15.0, center: center, minZoom: 5, maxZoom: 20),
               layers: [
                 TileLayerOptions(
-                    urlTemplate: apiData['mapURL'].toString(),
+                    urlTemplate: dotenv.env['MAP_URL'],
                     additionalOptions: {
-                      'accessToken': apiData['mapToken'].toString(),
+                      'accessToken': "${dotenv.env['MAP_TOKEN']}",
                       'id': 'mapbox.mapbox-streets-v8'
                     }),
                 MarkerLayerOptions(markers: tutors),
