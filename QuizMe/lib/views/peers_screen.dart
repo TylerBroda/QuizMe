@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quizme/utils/auth.dart';
 import 'package:quizme/model/db_user.dart';
+import 'dart:math';
 
 class PeersScreen extends StatefulWidget {
   const PeersScreen({Key key}) : super(key: key);
@@ -13,6 +14,7 @@ class PeersScreen extends StatefulWidget {
 
 class _PeersScreenState extends State<PeersScreen> {
   var peersDB = FirebaseFirestore.instance.collection('peers');
+  TextEditingController _controller = TextEditingController();
   String mainuser = "Admin";
   String _mainDocID;
   String _selectedID;
@@ -63,12 +65,8 @@ class _PeersScreenState extends State<PeersScreen> {
         stream: getData(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return Text("No Data");
-          return ListView.separated(
+          return ListView.builder(
               padding: EdgeInsets.only(top: 10),
-              separatorBuilder: (context, index) => Divider(
-                    color: Colors.black,
-                    thickness: 1,
-                  ),
               itemCount: snapshot.data.docs.length,
               itemBuilder: (BuildContext ctxt, int index) {
                 final docData = snapshot.data.docs[index];
@@ -76,14 +74,15 @@ class _PeersScreenState extends State<PeersScreen> {
                     child: Card(
                         color: _selectedIndx == index
                             ? Colors.amber
-                            : Colors.transparent,
+                            : Colors.white,
                         child: Column(
                           children: [
                             ListTile(
                                 leading: CircleAvatar(
-                                  backgroundColor: Colors.brown,
+                                  backgroundColor: Colors.primaries[Random()
+                                      .nextInt(Colors.primaries.length)],
                                   child: Text(
-                                    docData['name'][0],
+                                    docData['name'][0].toString().toUpperCase(),
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white),
@@ -107,8 +106,62 @@ class _PeersScreenState extends State<PeersScreen> {
           child: Icon(Icons.add),
           onPressed: () async {
             //Todo: Adding a validator for checking if the person exists in the db
-            addpeer("Liam_Neeson");
+            _showDialog(context);
           }),
+    );
+  }
+
+  _showDialog(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    String input;
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Form(
+            key: _formKey,
+            child: SimpleDialog(
+                title: Center(
+                  child: Text("ADD FRIEND"),
+                ),
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(left: 30, right: 30),
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Missing username";
+                        }
+                        if (value.contains(" ")) {
+                          return "invalid username, can't contain spaces";
+                        }
+
+                        if (value.length < 6) {
+                          return "Username must be longer than 6 characters";
+                        }
+                      },
+                      onSaved: (value) {
+                        input = value;
+                      },
+                      decoration: InputDecoration(labelText: "Enter Username"),
+                    ),
+                  ),
+                  Container(
+                      padding: EdgeInsets.only(left: 40, right: 40),
+                      width: 200,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            if (_formKey.currentState.validate()) {
+                              _formKey.currentState.save();
+                              addpeer(input);
+                            }
+                          });
+                        },
+                        icon: Icon(Icons.login),
+                        label: Text("Submit"),
+                      )),
+                ]));
+      },
     );
   }
 
@@ -158,14 +211,44 @@ class _PeersScreenState extends State<PeersScreen> {
   }
 
   Future<void> addpeer(String peer) async {
-    return peersDB
-        .doc(_mainDocID.toString())
-        .collection('peernames')
-        .add({
-          'name': peer,
-        })
-        .then((value) => print("Peer added"))
-        .catchError((error) => print("Failed to add Peer: $error"));
+    var userDB = FirebaseFirestore.instance.collection('users');
+    var usersSnapshot = await userDB.where('Username', isEqualTo: peer).get();
+
+    var peers = peersDB.doc(_mainDocID).collection('peernames');
+    var peersSnapshot = await peers.where('name', isEqualTo: peer).get();
+
+    if (peersSnapshot.size > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              "User already exists",
+              textAlign: TextAlign.start,
+            ),
+            backgroundColor: Colors.red),
+      );
+      return;
+    } else if (usersSnapshot.size == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              "The user does not exist",
+              textAlign: TextAlign.start,
+            ),
+            backgroundColor: Colors.red),
+      );
+      return;
+    } else {
+      return peersDB
+          .doc(_mainDocID.toString())
+          .collection('peernames')
+          .add({
+            'name': peer,
+          })
+          .then((value) => print("Peer added"))
+          .catchError((error) => print("Failed to add Peer: $error"));
+    }
   }
 
   Stream<QuerySnapshot> getData() {

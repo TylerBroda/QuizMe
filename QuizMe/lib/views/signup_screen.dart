@@ -110,7 +110,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             fontFamily: 'AvenirLight'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return "Missing email";
+                            return "Missing username";
                           }
                           if (value.contains(" ")) {
                             return "invalid username, can't contain spaces";
