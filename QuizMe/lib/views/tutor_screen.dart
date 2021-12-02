@@ -13,11 +13,20 @@ class TutorScreen extends StatefulWidget {
 }
 
 class _TutorScreenState extends State<TutorScreen> {
-  final api = FirebaseFirestore.instance.collection('api');
+  final tutorData = FirebaseFirestore.instance.collection('tutors');
 
   List<Marker> tutors = [];
 
   final center = LatLng(43.9455, -78.8968); //For testing map
+
+  final _formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final subjectController = TextEditingController();
+  final priceController = TextEditingController();
+  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
+  final addressController = TextEditingController();
+  final descriptionController = TextEditingController();
 
   @override
   void initState() {
@@ -31,12 +40,7 @@ class _TutorScreenState extends State<TutorScreen> {
     return Scaffold(
       appBar:
           AppBar(title: const Text("Tutors"), automaticallyImplyLeading: false),
-      body: StreamBuilder(
-          stream: api.snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (!snapshot.hasData) return const Text("Loading Map...");
-            return FlutterMap(
+      body: FlutterMap(
               options: MapOptions(
                   zoom: 15.0, center: center, minZoom: 5, maxZoom: 20),
               layers: [
@@ -48,11 +52,209 @@ class _TutorScreenState extends State<TutorScreen> {
                     }),
                 MarkerLayerOptions(markers: tutors),
               ],
-            );
-          }),
+            ),
       //TODO: Add geolocation for uploading tutor markers
       floatingActionButton:
-          FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+          FloatingActionButton(
+            onPressed: () {
+              showDialog(
+                context: context, 
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Submit a Tutor Marker!'),
+                    content: Form(
+                      key: _formKey,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: nameController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a name';
+                                      }
+                                      return null;
+                                    },
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.person),
+                                      labelText: 'Name *',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: subjectController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a subject';
+                                      }
+                                      return null;
+                                    },
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.subject),
+                                      labelText: 'Subject *',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: priceController,
+                                    validator: (value) {
+                                      //TODO: Pricing info validation
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter pricing information';
+                                      }
+                                      return null;
+                                    },
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.money),
+                                      labelText: 'Price *',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: phoneController,
+                                    validator: (value) {
+                                      //TODO: Phone number format validation
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter a phone number';
+                                      }
+                                      return null;
+                                    },
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.phone),
+                                      labelText: 'Phone Number *',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: emailController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter an email';
+                                      }
+                                      else if (!value.contains("@") || value.contains(" ")) {
+                                        return "Invalid email";
+                                      }
+                                      return null;
+                                    },
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.mail),
+                                      labelText: 'Email *',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: addressController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter an address';
+                                      }
+                                      return null;
+                                    },
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.home),
+                                      labelText: 'Address *',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                    controller: descriptionController,
+                                    decoration: const InputDecoration(
+                                      icon: Icon(Icons.info_outline),
+                                      labelText: 'Description',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ),
+                    actions: [
+                      OutlinedButton(
+                        onPressed: () async {
+                          //TODO: Submit geolocation info to firebase,
+
+                          if (_formKey.currentState!.validate()) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Submitting Marker...')),
+                            );
+
+                            Map<String, dynamic> insertRow = {
+                              "Name": nameController.text,
+                              "Subject": subjectController.text,
+                              "Price": priceController.text,
+                              "Contact": phoneController.text,
+                              "Email": emailController.text,
+                              "Address": addressController.text,
+                              "Description": descriptionController.text
+                            };
+                            await tutorData.add(insertRow);
+                          }
+                        }, 
+                        child: const Text(
+                          'Submit',
+                          style: TextStyle(color: Colors.white),
+                          ),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.pressed)) {
+                                return Theme.of(context).colorScheme.primary.withOpacity(0.5);
+                              }
+                              return Colors.blue;
+                            },
+                          )
+                        ),
+                      )
+                    ],
+                  );
+                }
+              );
+            }, 
+            child: const Icon(Icons.add)),
     );
   }
 
