@@ -1,8 +1,8 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
 import 'package:flutter/material.dart';
-
+import 'package:quizme/utils/auth.dart';
 import 'package:quizme/utils/app_colors.dart';
+import 'package:quizme/model/db_user.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -14,6 +14,14 @@ class AppDrawer extends StatefulWidget {
 // wrap this in a SizedBox with width: MediaQuery.of(context).size.width * 0.75 to change drawer width
 // use the person's pfp
 class _AppDrawerState extends State<AppDrawer> {
+  String? username = 'Admin';
+  String? email = 'Admin';
+  @override
+  void initState() {
+    super.initState();
+    retUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -32,41 +40,28 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
               Center(
                 child: CircleAvatar(
-                  child: Text("pfp"),
-                  radius: 30,
+                  child: Text(
+                    username![0].toUpperCase(),
+                    style: TextStyle(fontSize: 40, color: Colors.white),
+                  ),
+                  backgroundColor: Colors.red,
+                  radius: 50,
                 ),
               ),
               Container(
                 margin: EdgeInsets.only(top: 12, bottom: 2),
                 child: Center(
                   child: Text(
-                    "User Name",
+                    username!,
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
               ),
               Center(
                 child: Text(
-                  "User Email",
+                  email!,
                   style: TextStyle(color: Colors.grey),
                 ),
-              ),
-              SizedBox(height: 50,),
-              ListTile(
-                leading: Icon(Icons.home),
-                title: Text("Home"),
-              ),
-              ListTile(
-                leading: Icon(Icons.explore),
-                title: Text("Explore"),
-              ),
-              ListTile(
-                leading: Icon(Icons.person_search),
-                title: Text("Tutors"),
-              ),
-              ListTile(
-                leading: Icon(Icons.people),
-                title: Text("Peers"),
               ),
               Spacer(),
               ListTile(
@@ -78,5 +73,16 @@ class _AppDrawerState extends State<AppDrawer> {
         ),
       ),
     );
+  }
+
+  Future<void> retUser() async {
+    DBUser? user = await getAuthedUser();
+
+    if (user != null) {
+      setState(() {
+        username = user.username;
+        email = user.email;
+      });
+    }
   }
 }

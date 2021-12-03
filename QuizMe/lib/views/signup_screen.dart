@@ -29,9 +29,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   var userDB = FirebaseFirestore.instance.collection('users');
 
-  RegExp validPassword = RegExp(r'^[A-Za-z0-9]'); //for password
-  RegExp validUsername = RegExp(r'^[A-Za-z_]'); //for username
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,9 +115,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
                           if (value.length < 6) {
                             return "Username must be longer than 6 characters";
-                          }
-                          if (validUsername.allMatches(value) == false) {
-                            return "username can't contain special characters";
                           }
 
                           return null;

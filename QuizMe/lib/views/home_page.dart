@@ -20,7 +20,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  final views = [MyQuizzes(), ExploreScreen(), TutorScreen(), PeersScreen(), FactScreen()];
+  final views = [
+    MyQuizzes(),
+    ExploreScreen(),
+    TutorScreen(),
+    PeersScreen(),
+    FactScreen()
+  ];
 
   @override
   Widget build(BuildContext context) {
