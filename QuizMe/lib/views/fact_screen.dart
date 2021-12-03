@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
@@ -43,15 +44,27 @@ class _FactScreenState extends State<FactScreen> {
                   height: (MediaQuery.of(context).size.height - appBar.preferredSize.height) / 1.1,
                   width: MediaQuery.of(context).size.width,
                   child: Card(
+                    shadowColor: Colors.black,
+                    elevation: 10,
                     child: Container(
                       padding: const EdgeInsets.all(30),
-                      child: Center(
-                        child: Text(
-                          fact,
-                          style: const TextStyle(
-                            fontSize: 30
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Did you know?',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+                            ),
+                          const SizedBox(height: 20),
+                          Center(
+                            child: Text(
+                              fact,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                overflow: TextOverflow.clip
+                              ),
+                              ),
                           ),
-                          ),
+                        ],
                       ),
                     ),
                   ),
