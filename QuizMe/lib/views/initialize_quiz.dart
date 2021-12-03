@@ -19,6 +19,8 @@ class _InitializeQuizState extends State<InitializeQuiz> {
 
   String? quizName = "";
 
+  renameQuiz() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

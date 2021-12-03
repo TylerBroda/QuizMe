@@ -128,6 +128,9 @@ class _QuizCreatorState extends State<QuizCreator> {
     } else {
       await quizzesDB.doc(quizID).update(quizData);
     }
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text("Saved ${quiz.name}.")));
   }
 
   @override

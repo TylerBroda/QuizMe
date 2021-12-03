@@ -117,14 +117,14 @@ class _MyQuizzesState extends State<MyQuizzes> {
                       MaterialPageRoute(
                           builder: (context) => QuestionList(
                               chosenQuiz: chosenQuiz,
-                              quizID: _quizzes[index].quizID)),
+                              quizID: _quizzes[index].quizID,
+                              quizzesDB: quizzesDB)),
                     );
                   },
                   child: Container(
-                      decoration: new BoxDecoration(
+                      decoration: BoxDecoration(
                           border: Border(
-                              bottom:
-                                  new BorderSide(color: Colors.grey.shade300))),
+                              bottom: BorderSide(color: Colors.grey.shade300))),
                       child: ListTile(
                         title: Text(_quizzes[index].name),
                         subtitle: Text(_quizzes[index].topic),
