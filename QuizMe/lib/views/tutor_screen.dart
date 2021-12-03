@@ -20,9 +20,13 @@ class _TutorScreenState extends State<TutorScreen> {
 
   List<Marker> tutors = [];
 
-  final center = LatLng(43.9455, -78.8968); //For testing map: Ontario Tech
+  final defaultCenter =
+      LatLng(43.9455, -78.8968); //For testing map: Ontario Tech
+  late LatLng center;
+  bool mapIsLoaded = false;
   //final center = LatLng(37.4219873, -122.0839954); //For testing map: Amphitheatre Pkwy
 
+  MapController _mapController = MapController();
   Geolocator geolocator = Geolocator();
   String _currentLocation = '';
   String _address = '';
@@ -41,19 +45,32 @@ class _TutorScreenState extends State<TutorScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    getTutors().whenComplete(() => null);
+    Future.wait([
+      getTutors(),
+      _getCurrentPosition().then((currentPosition) {
+        setState(() {
+          center = (currentPosition != null)
+              ? LatLng(currentPosition.latitude, currentPosition.longitude)
+              : defaultCenter;
+        });
+      })
+    ]).then((value) {
+      setState(() {
+        mapIsLoaded = true;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    _checkPermissions();
     return Scaffold(
       appBar:
           AppBar(title: const Text("Tutors"), automaticallyImplyLeading: false),
-      body: FlutterMap(
-              //TODO: Initalize map with phones geolocation
+      body: !mapIsLoaded
+          ? const Center(child: CircularProgressIndicator())
+          : FlutterMap(
+              mapController: _mapController,
               options: MapOptions(
                   zoom: 15.0, center: center, minZoom: 5, maxZoom: 20),
               layers: [
@@ -66,216 +83,234 @@ class _TutorScreenState extends State<TutorScreen> {
                 MarkerLayerOptions(markers: tutors),
               ],
             ),
-      floatingActionButton:
-          FloatingActionButton(
-            onPressed: () async {
-              //Retrieving location & address
-              var position = await _checkPermissions();
-                          setState(() {
-                            _currentLocation =
-                                "Position(${position.latitude}, ${position.longitude})";
-                            lat = position.latitude;
-                            long = position.longitude;
-                          });
-              getAddress(lat, long);
+      floatingActionButton: !mapIsLoaded
+          ? null
+          : FloatingActionButton(
+              onPressed: () async {
+                //Retrieving location & address
+                var position = await _getCurrentPosition();
+                if (position == null) return;
 
-              showDialog(
-                context: context, 
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Submit a Tutor Marker!'),
-                    content: Form(
-                      key: _formKey,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: nameController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter a name';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.person),
-                                      labelText: 'Name *',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: subjectController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter a subject';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.subject),
-                                      labelText: 'Subject *',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: priceController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter pricing';
-                                      }
-                                      return null;
-                                    },
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.money),
-                                      labelText: 'Price *',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: phoneController,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter a phone number';
-                                      }
-                                      else if (value.length != 10) {
-                                        return 'Number must be 10 digits long';
-                                      }
-                                      return null;
-                                    },
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.phone),
-                                      labelText: 'Phone Number *',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: emailController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter an email';
-                                      }
-                                      else if (!value.contains("@") || value.contains(" ")) {
-                                        return "Invalid email";
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.mail),
-                                      labelText: 'Email *',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: descriptionController,
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.info_outline),
-                                      labelText: 'Description',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ),
-                    actions: [
-                      OutlinedButton(
-                        //TODO: Refresh map to display new marker once submitted
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Submitting Marker...')),
-                            );
+                setState(() {
+                  _currentLocation =
+                      "Position(${position.latitude}, ${position.longitude})";
+                  lat = position.latitude;
+                  long = position.longitude;
+                });
+                getAddress(lat, long);
 
-                            _price = 
-                              '\$' + priceController.text.replaceAll(' ', '').replaceAll('-', '') + '/hr';
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Submit a Tutor Marker!'),
+                        content: Form(
+                            key: _formKey,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: nameController,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please enter a name';
+                                            }
+                                            return null;
+                                          },
+                                          decoration: const InputDecoration(
+                                            icon: Icon(Icons.person),
+                                            labelText: 'Name *',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: subjectController,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please enter a subject';
+                                            }
+                                            return null;
+                                          },
+                                          decoration: const InputDecoration(
+                                            icon: Icon(Icons.subject),
+                                            labelText: 'Subject *',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: priceController,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please enter pricing';
+                                            }
+                                            return null;
+                                          },
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            icon: Icon(Icons.money),
+                                            labelText: 'Price *',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: phoneController,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly
+                                          ],
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please enter a phone number';
+                                            } else if (value.length != 10) {
+                                              return 'Number must be 10 digits long';
+                                            }
+                                            return null;
+                                          },
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            icon: Icon(Icons.phone),
+                                            labelText: 'Phone Number *',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: emailController,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please enter an email';
+                                            } else if (!value.contains("@") ||
+                                                value.contains(" ")) {
+                                              return "Invalid email";
+                                            }
+                                            return null;
+                                          },
+                                          decoration: const InputDecoration(
+                                            icon: Icon(Icons.mail),
+                                            labelText: 'Email *',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: descriptionController,
+                                          decoration: const InputDecoration(
+                                            icon: Icon(Icons.info_outline),
+                                            labelText: 'Description',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                        actions: [
+                          OutlinedButton(
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Submitting Marker...')),
+                                );
 
-                            _phoneNum = 
-                              '(' + phoneController.text.substring(0,3) + ')' 
-                              + ' ' + phoneController.text.substring(3,6) + ' - ' + phoneController.text.substring(6,10);
+                                _price = '\$' +
+                                    priceController.text
+                                        .replaceAll(' ', '')
+                                        .replaceAll('-', '') +
+                                    '/hr';
 
-                            Map<String, dynamic> insertRow = {
-                              "Name": nameController.text,
-                              "Subject": subjectController.text,
-                              "Price": _price,
-                              "Contact": _phoneNum,
-                              "Email": emailController.text,
-                              "Address": _address,
-                              "Description": descriptionController.text,
-                              "Location": GeoPoint(lat, long)
-                            };
-                            await tutorData.add(insertRow);
+                                _phoneNum = '(' +
+                                    phoneController.text.substring(0, 3) +
+                                    ')' +
+                                    ' ' +
+                                    phoneController.text.substring(3, 6) +
+                                    ' - ' +
+                                    phoneController.text.substring(6, 10);
 
-                            setState(() {});
-                          }
-                        }, 
-                        child: const Text(
-                          'Submit',
-                          style: TextStyle(color: Colors.white),
-                          ),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                              if (states.contains(MaterialState.pressed)) {
-                                return Theme.of(context).colorScheme.primary.withOpacity(0.5);
+                                Map<String, dynamic> insertRow = {
+                                  "Name": nameController.text,
+                                  "Subject": subjectController.text,
+                                  "Price": _price,
+                                  "Contact": _phoneNum,
+                                  "Email": emailController.text,
+                                  "Address": _address,
+                                  "Description": descriptionController.text,
+                                  "Location": GeoPoint(lat, long)
+                                };
+                                await tutorData.add(insertRow);
+
+                                getTutors();
                               }
-                              return Colors.blue;
                             },
+                            child: const Text(
+                              'Submit',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            style: ButtonStyle(backgroundColor:
+                                MaterialStateProperty.resolveWith<Color>(
+                              (Set<MaterialState> states) {
+                                if (states.contains(MaterialState.pressed)) {
+                                  return Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(0.5);
+                                }
+                                return Colors.blue;
+                              },
+                            )),
                           )
-                        ),
-                      )
-                    ],
-                  );
-                }
-              );
-            }, 
-            child: const Icon(Icons.add)),
+                        ],
+                      );
+                    });
+              },
+              child: const Icon(Icons.add)),
     );
   }
 
   Future<void> getTutors() async {
     await FirebaseFirestore.instance.collection('tutors').get().then((result) {
       if (result.docs.isNotEmpty) {
+        List<Marker> updatedTutors = [];
         result.docs.forEach((e) {
           Marker marker = Marker(
               builder: (BuildContext context) {
@@ -301,9 +336,12 @@ class _TutorScreenState extends State<TutorScreen> {
               },
               point: LatLng(e.data()['Location'].latitude,
                   e.data()['Location'].longitude));
-          setState(() {
-            tutors.add(marker);
-          });
+
+          updatedTutors.add(marker);
+        });
+
+        setState(() {
+          tutors = updatedTutors;
         });
       }
     });
@@ -311,16 +349,44 @@ class _TutorScreenState extends State<TutorScreen> {
     return;
   }
 
-  Future<Position> _checkPermissions() async {
+  Future<Position?> _getCurrentPosition() async {
     LocationPermission permission;
 
     permission = await Geolocator.checkPermission();
+    const String locationErrorMessage =
+        "Could not get current location since location services are disabled.";
+    const locationErrorSnackBar = SnackBar(
+        duration: Duration(seconds: 5),
+        content: Text(
+          locationErrorMessage,
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: Colors.red);
 
-    Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(locationErrorSnackBar);
+        return null;
+      }
+    }
 
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best);
-	}
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(locationErrorSnackBar);
+      return null;
+    }
+
+    try {
+      return await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best);
+    } catch (e) {
+      // for some reason, in emulator, when location services are disabled, Geolocator.checkPermission()
+      // returns LocationPermission.always and then Geolocator.getCurrentPosition() throws an exception
+      // since location services are disabled.. so this just handles that case
+      ScaffoldMessenger.of(context).showSnackBar(locationErrorSnackBar);
+      return null;
+    }
+  }
 
   getAddress(double latitude, double longitude) async {
     List<Placemark> places =
@@ -328,8 +394,7 @@ class _TutorScreenState extends State<TutorScreen> {
 
     _address =
         "${places.first.street}, ${places.first.locality}, ${places.first.country}, ${places.first.postalCode}";
-	}
-
+  }
 }
 
 Widget bottomSheet(String name, String email, String address, String subject,
