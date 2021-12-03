@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:quizme/views/fact_screen.dart';
 import 'package:quizme/views/my_quizzes.dart';
 import 'package:quizme/views/peers_screen.dart';
 import 'package:quizme/views/quiz_creator.dart';
@@ -19,7 +20,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  final views = [MyQuizzes(), ExploreScreen(), TutorScreen(), PeersScreen()];
+  final views = [MyQuizzes(), ExploreScreen(), TutorScreen(), PeersScreen(), FactScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +45,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             label: "Peers",
             icon: Icon(Icons.people),
+          ),
+          BottomNavigationBarItem(
+            label: "Facts",
+            icon: Icon(Icons.lightbulb),
           ),
         ],
         currentIndex: _currentIndex,
