@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'quiz_creator.dart';
 import './quiz_game.dart';
 import '../model/quiz.dart';
 
@@ -30,7 +31,17 @@ class _QuestionListState extends State<QuestionList> {
             itemCount: chosenQuiz.questions.length,
             itemBuilder: (context, index) {
               return GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => QuizCreator(
+                                questionNumber: index + 1,
+                                chosenQuiz: chosenQuiz,
+                                quizID: quizID,
+                              )),
+                    );
+                  },
                   child: Container(
                       decoration: new BoxDecoration(
                           border: Border(

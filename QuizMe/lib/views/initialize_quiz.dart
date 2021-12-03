@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/categories.dart';
 import './quiz_creator.dart';
+import '../model/quiz.dart';
 
 class InitializeQuiz extends StatefulWidget {
   const InitializeQuiz({Key? key}) : super(key: key);
@@ -75,9 +76,9 @@ class _InitializeQuizState extends State<InitializeQuiz> {
                                         MaterialPageRoute(
                                             builder: (context) => QuizCreator(
                                                   questionNumber: 1,
-                                                  topic: topic,
-                                                  quizName:
+                                                  chosenQuiz: Quiz(
                                                       quizNameController.text,
+                                                      topic, []),
                                                   quizID: "none",
                                                 )),
                                       );

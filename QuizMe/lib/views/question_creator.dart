@@ -1,36 +1,31 @@
 import 'package:flutter/material.dart';
 import '../model/quiz.dart';
 
-class EditOption {
-  TextEditingController controller;
-
-  EditOption(this.controller);
-}
-
 class QuestionCreator extends StatefulWidget {
-  const QuestionCreator({Key? key, required this.appendQuestionCB})
+  const QuestionCreator(
+      {Key? key, required this.question, required this.appendQuestionCB})
       : super(key: key);
 
+  final Question question;
   final Function appendQuestionCB;
 
   @override
-  QuestionCreatorState createState() =>
-      QuestionCreatorState(appendQuestionCB: this.appendQuestionCB);
+  QuestionCreatorState createState() => QuestionCreatorState(
+      question: this.question, appendQuestionCB: this.appendQuestionCB);
 }
 
 class QuestionCreatorState extends State<QuestionCreator> {
   int correctOptionIndex = 0;
+  Question question;
   final Function appendQuestionCB;
 
-  QuestionCreatorState({required this.appendQuestionCB});
+  QuestionCreatorState(
+      {required this.question, required this.appendQuestionCB});
 
   TextEditingController questionController = TextEditingController();
   bool deleteMode = false;
 
-  List<EditOption> _editOptions = [
-    EditOption(TextEditingController()),
-    EditOption(TextEditingController()),
-  ];
+  List<TextEditingController> _editOptions = [];
 
   switchDeleteMode(bool sync) {
     setState(() {
@@ -41,12 +36,29 @@ class QuestionCreatorState extends State<QuestionCreator> {
   saveQuestion() {
     List<String> options = [];
 
-    for (EditOption editOption in _editOptions) {
-      options = [...options, editOption.controller.text];
+    for (TextEditingController editOption in _editOptions) {
+      options = [...options, editOption.text];
     }
 
     appendQuestionCB(
         Question(questionController.text, correctOptionIndex, options));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    int optionsAmount =
+        question.options.isNotEmpty ? question.options.length : 2;
+
+    questionController.text = question.question;
+    _editOptions = List.generate(optionsAmount, (i) => TextEditingController());
+
+    if (question.options.isNotEmpty) {
+      for (int i = 0; i < _editOptions.length; i++) {
+        _editOptions[i].text = question.options[i];
+      }
+    }
   }
 
   @override
@@ -71,7 +83,7 @@ class QuestionCreatorState extends State<QuestionCreator> {
                           labelText: "Option ${index.toString()}",
                           icon: Text("${index.toString()}.")),
                       maxLines: 2,
-                      controller: _editOptions[index - 1].controller),
+                      controller: _editOptions[index - 1]),
                 ),
                 Expanded(
                     flex: 2,
@@ -91,10 +103,6 @@ class QuestionCreatorState extends State<QuestionCreator> {
                                 onChanged: (value) {
                                   setState(() {
                                     correctOptionIndex = index - 1;
-                                    // for (EditOption option in _editOptions) {
-                                    //   option.isAnswer = false;
-                                    // }
-                                    // _editOptions[index - 1].isAnswer = true;
                                   });
                                 },
                               ),
@@ -137,7 +145,7 @@ class QuestionCreatorState extends State<QuestionCreator> {
                           setState(() {
                             _editOptions = [
                               ..._editOptions,
-                              EditOption(TextEditingController())
+                              TextEditingController()
                             ];
                           });
                         },
