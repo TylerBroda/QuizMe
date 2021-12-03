@@ -8,31 +8,35 @@ class EditOption {
 }
 
 class QuestionCreator extends StatefulWidget {
-  const QuestionCreator(
-      {Key? key, required this.questionNumber, required this.callback})
+  const QuestionCreator({Key? key, required this.appendQuestionCB})
       : super(key: key);
 
-  final int questionNumber;
-  final Function callback;
+  final Function appendQuestionCB;
 
   @override
-  QuestionCreatorState createState() => QuestionCreatorState(
-      questionNumber: this.questionNumber, callback: this.callback);
+  QuestionCreatorState createState() =>
+      QuestionCreatorState(appendQuestionCB: this.appendQuestionCB);
 }
 
 class QuestionCreatorState extends State<QuestionCreator> {
-  int questionNumber;
   int correctOptionIndex = 0;
-  final Function callback;
+  final Function appendQuestionCB;
 
-  QuestionCreatorState({required this.questionNumber, required this.callback});
+  QuestionCreatorState({required this.appendQuestionCB});
 
   TextEditingController questionController = TextEditingController();
+  bool deleteMode = false;
 
   List<EditOption> _editOptions = [
     EditOption(TextEditingController()),
     EditOption(TextEditingController()),
   ];
+
+  switchDeleteMode(bool sync) {
+    setState(() {
+      deleteMode = sync ? false : !deleteMode;
+    });
+  }
 
   saveQuestion() {
     List<String> options = [];
@@ -41,44 +45,38 @@ class QuestionCreatorState extends State<QuestionCreator> {
       options = [...options, editOption.controller.text];
     }
 
-    callback(Question(questionController.text, correctOptionIndex, options));
+    appendQuestionCB(
+        Question(questionController.text, correctOptionIndex, options));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      Container(
-          padding: const EdgeInsets.all(15.0),
-          child: Text(
-            "Question $questionNumber",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          )),
-      Expanded(
-          child: ListView.builder(
-              padding: const EdgeInsets.all(20.0),
-              itemCount: _editOptions.length + 2,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return TextFormField(
-                      decoration: const InputDecoration(
-                          labelText: "Question", icon: Icon(Icons.help)),
-                      maxLines: 6,
-                      controller: questionController);
-                } else if (index <= _editOptions.length) {
-                  return Row(
-                    children: [
-                      Expanded(
-                        flex: 8,
-                        child: TextFormField(
-                            decoration: InputDecoration(
-                                labelText: "Option ${index.toString()}",
-                                icon: Text("${index.toString()}.")),
-                            maxLines: 2,
-                            controller: _editOptions[index - 1].controller),
-                      ),
-                      Expanded(
-                          flex: 2,
-                          child: Column(
+    return ListView.builder(
+        padding: const EdgeInsets.all(20.0),
+        itemCount: _editOptions.length + 2,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return TextFormField(
+                decoration: const InputDecoration(
+                    labelText: "Question", icon: Icon(Icons.help)),
+                maxLines: 6,
+                controller: questionController);
+          } else if (index <= _editOptions.length) {
+            return Row(
+              children: [
+                Expanded(
+                  flex: 8,
+                  child: TextFormField(
+                      decoration: InputDecoration(
+                          labelText: "Option ${index.toString()}",
+                          icon: Text("${index.toString()}.")),
+                      maxLines: 2,
+                      controller: _editOptions[index - 1].controller),
+                ),
+                Expanded(
+                    flex: 2,
+                    child: !deleteMode
+                        ? Column(
                             children: [
                               Radio(
                                 fillColor: MaterialStateColor.resolveWith(
@@ -110,26 +108,42 @@ class QuestionCreatorState extends State<QuestionCreator> {
                                           : Colors.red,
                                       fontSize: 12))
                             ],
-                          )),
-                    ],
-                  );
-                } else {
-                  return Center(
-                      child: Container(
-                          margin: const EdgeInsets.all(20.0),
-                          child: ElevatedButton.icon(
-                              onPressed: () {
+                          )
+                        : IconButton(
+                            onPressed: () {
+                              if (_editOptions.length > 2) {
                                 setState(() {
-                                  _editOptions = [
-                                    ..._editOptions,
-                                    EditOption(TextEditingController())
-                                  ];
+                                  _editOptions.removeAt(index - 1);
                                 });
-                              },
-                              icon: const Icon(Icons.add),
-                              label: const Text("Option"))));
-                }
-              })),
-    ]);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "You need at least 2 options.")));
+                              }
+                            },
+                            icon: Icon(Icons.delete),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                          )),
+              ],
+            );
+          } else {
+            return Center(
+                child: Container(
+                    margin: const EdgeInsets.all(20.0),
+                    child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _editOptions = [
+                              ..._editOptions,
+                              EditOption(TextEditingController())
+                            ];
+                          });
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text("Option"))));
+          }
+        });
   }
 }

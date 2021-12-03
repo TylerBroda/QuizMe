@@ -6,8 +6,6 @@ import 'package:quizme/utils/auth.dart';
 import './question_creator.dart';
 import '../model/quiz.dart';
 
-List<GlobalKey<QuestionCreatorState>> globalKeys = [GlobalKey()];
-
 class QuizCreator extends StatefulWidget {
   const QuizCreator(
       {Key? key,
@@ -34,10 +32,13 @@ class _QuizCreatorState extends State<QuizCreator> {
   final CollectionReference _quizCollection =
       FirebaseFirestore.instance.collection("quizzes");
 
+  List<GlobalKey<QuestionCreatorState>> globalKeys = [GlobalKey()];
+
   int questionNumber;
   String topic;
   String quizName;
   String quizID;
+  bool deleteMode = false;
 
   _QuizCreatorState(
       {required this.questionNumber,
@@ -52,14 +53,37 @@ class _QuizCreatorState extends State<QuizCreator> {
   void initState() {
     super.initState();
     questionPages = [
-      QuestionCreator(
-          questionNumber: 1, callback: _callback, key: globalKeys[0])
+      QuestionCreator(appendQuestionCB: _appendQuestionCB, key: globalKeys[0])
     ];
     quiz = Quiz(quizName, topic, []);
   }
 
-  _callback(Question newQuestion) {
+  _deleteQuestion(int index) async {
+    setState(() {
+      questionNumber = questionNumber - 1; // Go back a page
+      globalKeys.removeAt(index);
+      questionPages.removeAt(index); // Delete widget
+    });
+
+    // if (quiz.questions.isNotEmpty) {
+    //   _saveQuiz();
+    // }
+  }
+
+  // Callback function
+  _appendQuestionCB(Question newQuestion) {
     quiz.questions = [...quiz.questions, newQuestion];
+  }
+
+  // Access child functions
+  _switchDeleteModes({bool sync = false}) async {
+    for (int i = 0; i < questionPages.length; i++) {
+      // print("${globalKeys[i].currentState} $i");
+      await globalKeys[i].currentState?.switchDeleteMode(sync);
+    }
+    setState(() {
+      deleteMode = sync ? false : !deleteMode;
+    });
   }
 
   _saveQuiz() async {
@@ -98,29 +122,53 @@ class _QuizCreatorState extends State<QuizCreator> {
     return Scaffold(
         appBar: AppBar(
             title: Text('Edit $quizName'),
-            leading: IconButton(
-              icon: Icon(Icons.list),
-              onPressed: () {},
-            ),
-            centerTitle: true,
             automaticallyImplyLeading: false,
             actions: <Widget>[
+              IconButton(
+                  onPressed: () {
+                    _switchDeleteModes();
+                  },
+                  icon: !deleteMode ? Icon(Icons.delete) : Icon(Icons.edit)),
               TextButton.icon(
                   label: const Icon(
                     Icons.check,
                     color: Colors.white,
                   ),
-                  icon: Text('Done', style: TextStyle(color: Colors.white)),
+                  icon:
+                      const Text('Done', style: TextStyle(color: Colors.white)),
                   onPressed: () async {
                     await _saveQuiz();
                     Navigator.pushNamed(context, '/home');
                   })
             ]),
         resizeToAvoidBottomInset: false,
-        body: IndexedStack(
-          index: questionNumber - 1,
-          children: questionPages,
-        ),
+        body: Column(children: [
+          Container(
+              padding: const EdgeInsets.all(20),
+              child:
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(
+                  "Question $questionNumber",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+                const SizedBox(width: 10),
+                deleteMode
+                    ? IconButton(
+                        onPressed: () {
+                          areYouSure(context);
+                        },
+                        icon: Icon(Icons.delete),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      )
+                    : Container()
+              ])),
+          Expanded(
+            child: IndexedStack(
+                index: questionNumber - 1, children: questionPages),
+          )
+        ]),
         bottomNavigationBar: BottomAppBar(
             child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -150,10 +198,11 @@ class _QuizCreatorState extends State<QuizCreator> {
                       questionPages = [
                         ...questionPages,
                         QuestionCreator(
-                            questionNumber: questionNumber + 1,
-                            callback: _callback,
+                            appendQuestionCB: _appendQuestionCB,
                             key: globalKeys[globalKeys.length - 1])
                       ];
+
+                      _switchDeleteModes(sync: true);
                     }
                     questionNumber = questionNumber + 1;
                   });
@@ -165,5 +214,36 @@ class _QuizCreatorState extends State<QuizCreator> {
             onPressed: () {
               _saveQuiz();
             }));
+  }
+
+  areYouSure(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: Text("Delete Question $questionNumber"),
+      content:
+          Text("Are you sure you want to delete Question $questionNumber?"),
+      actions: [
+        TextButton(
+          child: const Text("NO"),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        TextButton(
+          child: const Text("YES"),
+          onPressed: () async {
+            await _deleteQuestion(questionNumber - 1);
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }
