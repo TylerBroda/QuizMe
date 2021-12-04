@@ -106,7 +106,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       body: StreamBuilder(
         stream: quizzes.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return const Text("No Data");
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
 
           //Filter quizzes by dropdown selection
           filterDocs = snapshot.data!.docs;

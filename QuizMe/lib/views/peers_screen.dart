@@ -64,7 +64,7 @@ class _PeersScreenState extends State<PeersScreen> {
       body: StreamBuilder(
         stream: getData(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return Text("No Data");
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           return ListView.builder(
               padding: EdgeInsets.only(top: 10),
               itemCount: snapshot.data.docs.length,
