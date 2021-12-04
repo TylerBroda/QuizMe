@@ -14,8 +14,9 @@ class QuizInfo {
   String quizID;
   String name;
   String topic;
+  bool isFilled;
 
-  QuizInfo(this.quizID, this.name, this.topic);
+  QuizInfo(this.quizID, this.name, this.topic, this.isFilled);
 }
 
 class MyQuizzes extends StatefulWidget {
@@ -74,7 +75,16 @@ class _MyQuizzesState extends State<MyQuizzes> {
       setState(() {
         _quizzes = ownQuizzesSnapshot.docs.map((doc) {
           var quizData = doc.data();
-          return QuizInfo(doc.id, quizData['Name'], quizData['Category']);
+
+          for (int i = 0; i < quizData['Questions'].length; i++) {
+            if (quizData['Questions'][i]['Question'] == "" ||
+                quizData['Questions'][i]['Options'].contains("")) {
+              return QuizInfo(
+                  doc.id, quizData['Name'], quizData['Category'], false);
+            }
+          }
+
+          return QuizInfo(doc.id, quizData['Name'], quizData['Category'], true);
         }).toList();
         loadedQuizzes = true;
       });
@@ -119,9 +129,33 @@ class _MyQuizzesState extends State<MyQuizzes> {
                           border: Border(
                               bottom: BorderSide(color: Colors.grey.shade300))),
                       child: ListTile(
-                        title: Text(_quizzes[index].name),
-                        subtitle: Text(_quizzes[index].topic),
-                      )));
+                          title: Text(_quizzes[index].name),
+                          subtitle: Text(_quizzes[index].topic),
+                          trailing: _quizzes[index].isFilled == true
+                              ? Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle_outline,
+                                      color: Colors.green,
+                                    ),
+                                    Text("Live",
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey)),
+                                    SizedBox(width: 90)
+                                  ],
+                                )
+                              : Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Icon(Icons.handyman),
+                                    Text("Work in progress",
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey))
+                                  ],
+                                ))));
             });
       } else {
         return Center(child: Text("No quizzes made yet."));

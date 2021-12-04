@@ -71,8 +71,8 @@ class _FactScreenState extends State<FactScreen> {
                 getData();
               });
             },
-            label: Text("New Fact"),
-            icon: Icon(Icons.refresh)));
+            label: const Text("New Fact"),
+            icon: const Icon(Icons.refresh)));
   }
 
   Future<String> getData() async {
