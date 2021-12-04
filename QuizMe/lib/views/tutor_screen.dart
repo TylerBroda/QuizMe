@@ -232,6 +232,11 @@ class _TutorScreenState extends State<TutorScreen> {
                                       children: [
                                         TextFormField(
                                           controller: descriptionController,
+                                          validator: (value) {
+                                            if (value!.length > 100) {
+                                              return 'Max Character Limit: 100';
+                                            }
+                                          },
                                           decoration: const InputDecoration(
                                             icon: Icon(Icons.info_outline),
                                             labelText: 'Description',
@@ -406,15 +411,15 @@ Widget bottomSheet(String name, String email, String address, String subject,
         color: Colors.blueAccent,
         child: ListTile(
           title: Text(
-            '$name',
+            name,
             style: const TextStyle(color: Colors.white, fontSize: 20.0),
           ),
           subtitle: Text(
-            '$subject',
+            subject,
             style: const TextStyle(color: Colors.white70, fontSize: 14.0),
           ),
           trailing: Text(
-            '$price',
+            price,
             style: const TextStyle(color: Colors.white, fontSize: 20.0),
           ),
         ),
@@ -428,7 +433,7 @@ Widget bottomSheet(String name, String email, String address, String subject,
           SizedBox(
             width: 250,
             child: ListTile(
-              title: FittedBox(child: Text('$contact')),
+              title: FittedBox(child: Text(contact)),
               leading: const Icon(
                 Icons.call,
                 color: Colors.blueAccent,
@@ -443,9 +448,9 @@ Widget bottomSheet(String name, String email, String address, String subject,
       Row(
         children: [
           SizedBox(
-            width: 300,
+            width: 250,
             child: ListTile(
-              title: FittedBox(child: Text('$email')),
+              title: FittedBox(child: Text(email)),
               leading: const Icon(
                 Icons.mail,
                 color: Colors.blueAccent,
@@ -462,7 +467,7 @@ Widget bottomSheet(String name, String email, String address, String subject,
         children: [
           Expanded(
             child: ListTile(
-              title: FittedBox(child: Text('$address')),
+              title: FittedBox(child: Text(address)),
               leading: const Icon(
                 Icons.location_on,
                 color: Colors.blueAccent,
@@ -477,20 +482,15 @@ Widget bottomSheet(String name, String email, String address, String subject,
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              'About:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 2, right: 8),
-            child: SizedBox(
-              width: 320,
-              child: Text(
-                '$description',
-                textAlign: TextAlign.left,
+          Expanded(
+            child: ListTile(
+              title: Text(
+                description,
+                style: const TextStyle(fontSize: 14),
+              ),
+              leading: const Icon(
+                Icons.info_outline,
+                color: Colors.blueAccent,
               ),
             ),
           ),
