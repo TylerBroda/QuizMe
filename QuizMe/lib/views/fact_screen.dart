@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:quizme/widgets/app_drawer.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -13,7 +14,6 @@ class FactScreen extends StatefulWidget {
 }
 
 class _FactScreenState extends State<FactScreen> {
-  
   String fact = '';
   String apiKey = dotenv.env['FACT_KEY'] as String;
 
@@ -21,61 +21,59 @@ class _FactScreenState extends State<FactScreen> {
   Widget build(BuildContext context) {
     var appBar = AppBar();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Interesting Facts!'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              getData();
-              setState(() {});
-            }, 
-            icon: const Icon(Icons.refresh)
-          )
-        ],
-      ),
-      body: FutureBuilder(
-        future: getData(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (!snapshot.hasData) {
-	          return const Center(child: CircularProgressIndicator());
-	        }
-          return Container(
-                  padding: const EdgeInsets.all(30),
-                  height: (MediaQuery.of(context).size.height - appBar.preferredSize.height) / 1.1,
-                  width: MediaQuery.of(context).size.width,
-                  child: Card(
-                    shadowColor: Colors.black,
-                    elevation: 10,
-                    child: Container(
-                      padding: const EdgeInsets.all(30),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Did you know?',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
-                            ),
-                          const SizedBox(height: 20),
-                          Center(
-                            child: Text(
-                              fact,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                overflow: TextOverflow.clip
-                              ),
-                              ),
+        appBar: AppBar(
+          title: const Text('Interesting Facts'),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  getData();
+                  setState(() {});
+                },
+                icon: const Icon(Icons.refresh))
+          ],
+        ),
+        drawer: const AppDrawer(),
+        body: FutureBuilder(
+            future: getData(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return Container(
+                padding: const EdgeInsets.all(30),
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height) /
+                    1.1,
+                width: MediaQuery.of(context).size.width,
+                child: Card(
+                  shadowColor: Colors.black,
+                  elevation: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Did you know?',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 28),
+                        ),
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Text(
+                            fact,
+                            style: const TextStyle(
+                                fontSize: 24, overflow: TextOverflow.clip),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-        }
-      )
-      );
+                ),
+              );
+            }));
   }
 
   Future<String> getData() async {
-        
     Map<String, String> _headers = {
       "content-type": "application/json",
       "x-rapidapi-host": "facts-by-api-ninjas.p.rapidapi.com",
@@ -83,17 +81,15 @@ class _FactScreenState extends State<FactScreen> {
     };
 
     var url = Uri.https('facts-by-api-ninjas.p.rapidapi.com', '/v1/facts');
-     
+
     //Await the http get response, then decode the json-formatted response
     var response = await http.get(url, headers: _headers);
     if (response.statusCode == 200) {
       var jsonResponse = convert.jsonDecode(response.body);
       fact = jsonResponse[0]['fact'];
       return fact;
-    } 
-    else {
+    } else {
       return 'Error: ${response.statusCode}';
     }
   }
-
 }

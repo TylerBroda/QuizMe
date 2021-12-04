@@ -6,6 +6,7 @@ import 'package:quizme/views/initialize_quiz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quizme/views/question_list.dart';
+import 'package:quizme/widgets/app_drawer.dart';
 import '../model/quiz.dart';
 import '../model/db_user.dart';
 
@@ -31,7 +32,6 @@ class _MyQuizzesState extends State<MyQuizzes> {
   bool loadedQuizzes = false;
   int _selectedIndex = -1;
 
-  var userDB = FirebaseFirestore.instance.collection('users');
   var quizzesDB = FirebaseFirestore.instance.collection('quizzes');
 
   @override
@@ -39,15 +39,8 @@ class _MyQuizzesState extends State<MyQuizzes> {
     return Scaffold(
         appBar: AppBar(
           title: const Text("My Quizzes"),
-          automaticallyImplyLeading: false,
-          actions: [
-            IconButton(
-                onPressed: () {
-                  showLogoutConfirmation(context);
-                },
-                icon: const Icon(Icons.directions_run)),
-          ],
         ),
+        drawer: const AppDrawer(),
         body: getMyQuizzesBody(),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -134,35 +127,5 @@ class _MyQuizzesState extends State<MyQuizzes> {
         return Center(child: Text("No quizzes made yet."));
       }
     }
-  }
-
-  showLogoutConfirmation(BuildContext context) {
-    Widget cancelButton = TextButton(
-      child: Text("Cancel"),
-      onPressed: () {
-        Navigator.pop(context);
-      },
-    );
-    Widget confirmButton = TextButton(
-      child: Text("Log out"),
-      onPressed: () async {
-        await FirebaseAuth.instance.signOut();
-        Navigator.pushReplacementNamed(context, '/login');
-      },
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Log out?"),
-          content: Text("Are you sure you want to log out?"),
-          actions: [
-            cancelButton,
-            confirmButton,
-          ],
-        );
-      },
-    );
   }
 }

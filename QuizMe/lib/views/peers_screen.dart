@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quizme/utils/auth.dart';
 import 'package:quizme/model/db_user.dart';
+import 'package:quizme/widgets/app_drawer.dart';
 import 'dart:math';
 
 class PeersScreen extends StatefulWidget {
@@ -30,28 +31,24 @@ class _PeersScreenState extends State<PeersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.brown,
-              child: Text(
-                mainuser[0].toUpperCase(),
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-            ),
-            SizedBox(
-              width: 20,
-            ),
-            Text(
-              "Peers List",
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ],
-        ),
+        title:
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.start,
+            //   children: [
+            //     CircleAvatar(
+            //       backgroundColor: Colors.brown,
+            //       child: Text(
+            //         mainuser[0].toUpperCase(),
+            //         style:
+            //             TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+            //       ),
+            //     ),
+            //     SizedBox(
+            //       width: 20,
+            //     ),
+            Text("Peers List"),
+        // ],
+        // ),
         actions: [
           IconButton(
             onPressed: () {
@@ -61,10 +58,12 @@ class _PeersScreenState extends State<PeersScreen> {
           ),
         ],
       ),
+      drawer: const AppDrawer(),
       body: StreamBuilder(
         stream: getData(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
           return ListView.builder(
               padding: EdgeInsets.only(top: 10),
               itemCount: snapshot.data.docs.length,

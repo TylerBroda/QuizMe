@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:quizme/utils/app_colors.dart';
 import 'package:quizme/model/db_user.dart';
 
@@ -68,6 +69,13 @@ class _AppDrawerState extends State<AppDrawer> {
                 leading: Icon(Icons.settings),
                 title: Text("Settings"),
               ),
+              ListTile(
+                leading: Icon(Icons.logout),
+                onTap: () {
+                  showLogoutConfirmation(context);
+                },
+                title: Text("Logout"),
+              ),
             ],
           ),
         ),
@@ -84,5 +92,35 @@ class _AppDrawerState extends State<AppDrawer> {
         email = user.email;
       });
     }
+  }
+
+  showLogoutConfirmation(BuildContext context) {
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    Widget confirmButton = TextButton(
+      child: Text("Log out"),
+      onPressed: () async {
+        await FirebaseAuth.instance.signOut();
+        Navigator.pushReplacementNamed(context, '/login');
+      },
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Log out?"),
+          content: Text("Are you sure you want to log out?"),
+          actions: [
+            cancelButton,
+            confirmButton,
+          ],
+        );
+      },
+    );
   }
 }

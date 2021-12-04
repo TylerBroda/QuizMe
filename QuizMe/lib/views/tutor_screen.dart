@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quizme/widgets/app_drawer.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -19,7 +20,6 @@ class TutorScreen extends StatefulWidget {
 }
 
 class _TutorScreenState extends State<TutorScreen> {
-
   final tutorData = FirebaseFirestore.instance.collection('tutors');
   var userDB = FirebaseFirestore.instance.collection('users');
 
@@ -70,73 +70,70 @@ class _TutorScreenState extends State<TutorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(
-            title: const Text("Tutors"), 
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(onPressed: () {
+      appBar: AppBar(
+        title: const Text("Tutors"),
+        actions: [
+          IconButton(
+              onPressed: () {
                 showDialog(
-                  context: context, 
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Delete Markers'),
-                      content: SingleChildScrollView(
-                        child: ListBody(
-                          children: const [
-                            Text('Are you sure you want to delete your tutor markers?'),
-                            SizedBox(height:10),
-                            Text(
-                              'This action can\'t be undone.',
-                              style: TextStyle(fontWeight: FontWeight.bold)
-                            )
-                          ],
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Delete Markers'),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: const [
+                              Text(
+                                  'Are you sure you want to delete your tutor markers?'),
+                              SizedBox(height: 10),
+                              Text('This action can\'t be undone.',
+                                  style: TextStyle(fontWeight: FontWeight.bold))
+                            ],
+                          ),
                         ),
-                      ),
-                      actions: [
-                        OutlinedButton(
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Deleting Marker(s)...')),
-                            );
-                            
-                            await deleteTutors();
-                            getTutors();
-                          }, 
-                          child: const Text(
+                        actions: [
+                          OutlinedButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Deleting Marker(s)...')),
+                              );
+
+                              await deleteTutors();
+                              getTutors();
+                            },
+                            child: const Text(
                               'Delete',
                               style: TextStyle(color: Colors.white),
                             ),
-                          style: ButtonStyle(backgroundColor:
-                            MaterialStateProperty.resolveWith<Color>(
+                            style: ButtonStyle(backgroundColor:
+                                MaterialStateProperty.resolveWith<Color>(
                               (Set<MaterialState> states) {
                                 if (states.contains(MaterialState.pressed)) {
                                   return Colors.red.withOpacity(0.5);
                                 }
                                 return Colors.red;
                               },
-                            )
+                            )),
                           ),
-                        ),
-                        OutlinedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          }, 
-                          child: const Text(
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text(
                               'Cancel',
                               style: TextStyle(color: Colors.black),
-                          ),
-                        )
-                      ],
-                    );
-                  }
-                );
-              }, 
+                            ),
+                          )
+                        ],
+                      );
+                    });
+              },
               icon: const Icon(Icons.delete))
-            ],
-          ),
+        ],
+      ),
+      drawer: const AppDrawer(),
       body: !mapIsLoaded
           ? const Center(child: CircularProgressIndicator())
           : FlutterMap(
@@ -410,7 +407,9 @@ class _TutorScreenState extends State<TutorScreen> {
                   },
                   icon: const Icon(Icons.location_on),
                   iconSize: 30.0,
-                  color: e.data()['User'] == user!.username ?  Colors.redAccent : Colors.blueAccent,
+                  color: e.data()['User'] == user!.username
+                      ? Colors.redAccent
+                      : Colors.blueAccent,
                 );
               },
               point: LatLng(e.data()['Location'].latitude,
@@ -430,12 +429,16 @@ class _TutorScreenState extends State<TutorScreen> {
 
   Future<void> deleteTutors() async {
     DBUser? user = await getAuthedUser();
-    await FirebaseFirestore.instance.collection('tutors').where('User', isEqualTo: user!.username).get().then((result) {
+    await FirebaseFirestore.instance
+        .collection('tutors')
+        .where('User', isEqualTo: user!.username)
+        .get()
+        .then((result) {
       if (result.docs.isNotEmpty) {
         result.docs.forEach((element) {
           tutorData.doc(element.id).delete();
         });
-      }      
+      }
     });
 
     return;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:quizme/model/db_user.dart';
 import 'package:quizme/utils/auth.dart';
 import './question_creator.dart';
+import './question_list.dart';
 import '../model/quiz.dart';
 
 class QuizCreator extends StatefulWidget {
@@ -200,7 +201,24 @@ class _QuizCreatorState extends State<QuizCreator> {
                         });
                       },
                     )
-                  : Container(width: 115, height: 10),
+                  : Container(width: 116, height: 10),
+              IconButton(
+                  onPressed: () async {
+                    await _saveQuiz();
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => QuestionList(
+                              chosenQuiz: quiz,
+                              quizID: quizID,
+                              quizzesDB: quizzesDB)),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.list,
+                    color: Colors.blue,
+                  )),
               TextButton.icon(
                 icon: Text('Question ${questionNumber + 1}'),
                 label: questionNumber == questionPages.length
