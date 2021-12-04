@@ -51,7 +51,7 @@ class _MyQuizzesState extends State<MyQuizzes> {
               );
             },
             // label: const Text(''),
-            child: const Icon(Icons.add)));
+            child: const Icon(Icons.quiz)));
 
     //       Column(
     //   // crossAxisAlignment: CrossAxisAlignment.center,
