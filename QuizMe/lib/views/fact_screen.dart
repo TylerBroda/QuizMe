@@ -23,14 +23,6 @@ class _FactScreenState extends State<FactScreen> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Interesting Facts'),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  getData();
-                  setState(() {});
-                },
-                icon: const Icon(Icons.refresh))
-          ],
         ),
         drawer: const AppDrawer(),
         body: FutureBuilder(
@@ -40,7 +32,8 @@ class _FactScreenState extends State<FactScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
               return Container(
-                padding: const EdgeInsets.all(30),
+                margin: const EdgeInsets.only(
+                    top: 30, left: 30, right: 30, bottom: 80),
                 height: (MediaQuery.of(context).size.height -
                         appBar.preferredSize.height) /
                     1.1,
@@ -62,7 +55,7 @@ class _FactScreenState extends State<FactScreen> {
                           child: Text(
                             fact,
                             style: const TextStyle(
-                                fontSize: 24, overflow: TextOverflow.clip),
+                                fontSize: 20, overflow: TextOverflow.clip),
                           ),
                         ),
                       ],
@@ -70,7 +63,16 @@ class _FactScreenState extends State<FactScreen> {
                   ),
                 ),
               );
-            }));
+            }),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              setState(() {
+                getData();
+              });
+            },
+            label: Text("New Fact"),
+            icon: Icon(Icons.refresh)));
   }
 
   Future<String> getData() async {
