@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:quizme/utils/auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -70,7 +71,67 @@ class _TutorScreenState extends State<TutorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
-          AppBar(title: const Text("Tutors"), automaticallyImplyLeading: false),
+          AppBar(
+            title: const Text("Tutors"), 
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(onPressed: () {
+                showDialog(
+                  context: context, 
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Delete Markers'),
+                      content: SingleChildScrollView(
+                        child: ListBody(
+                          children: const [
+                            Text('Are you sure you want to delete your tutor markers?'),
+                            SizedBox(height:10),
+                            Text(
+                              'This action can\'t be undone.',
+                              style: TextStyle(fontWeight: FontWeight.bold)
+                            )
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        OutlinedButton(
+                          onPressed: () {
+                            deleteTutors();
+                            getTutors();
+                            Navigator.pop(context);
+                          }, 
+                          child: const Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          style: ButtonStyle(backgroundColor:
+                            MaterialStateProperty.resolveWith<Color>(
+                              (Set<MaterialState> states) {
+                                if (states.contains(MaterialState.pressed)) {
+                                  return Colors.red.withOpacity(0.5);
+                                }
+                                return Colors.red;
+                              },
+                            )
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          }, 
+                          child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.black),
+                          ),
+                        )
+                      ],
+                    );
+                  }
+                );
+              }, 
+              icon: const Icon(Icons.delete))
+            ],
+          ),
       body: !mapIsLoaded
           ? const Center(child: CircularProgressIndicator())
           : FlutterMap(
@@ -357,6 +418,19 @@ class _TutorScreenState extends State<TutorScreen> {
           tutors = updatedTutors;
         });
       }
+    });
+
+    return;
+  }
+
+  Future<void> deleteTutors() async {
+    DBUser? user = await getAuthedUser();
+    await FirebaseFirestore.instance.collection('tutors').where('User', isEqualTo: user!.username).get().then((result) {
+      if (result.docs.isNotEmpty) {
+        result.docs.forEach((element) {
+          tutorData.doc(element.id).delete();
+        });
+      }      
     });
 
     return;
