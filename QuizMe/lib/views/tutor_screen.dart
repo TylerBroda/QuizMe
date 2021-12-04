@@ -95,10 +95,15 @@ class _TutorScreenState extends State<TutorScreen> {
                       ),
                       actions: [
                         OutlinedButton(
-                          onPressed: () {
-                            deleteTutors();
-                            getTutors();
+                          onPressed: () async {
                             Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Deleting Marker(s)...')),
+                            );
+                            
+                            await deleteTutors();
+                            getTutors();
                           }, 
                           child: const Text(
                               'Delete',
