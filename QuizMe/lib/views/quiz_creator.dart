@@ -74,7 +74,7 @@ class _QuizCreatorState extends State<QuizCreator> {
 
   _deleteQuestion(int index) async {
     setState(() {
-      questionNumber = questionNumber - 1; // Go back a page
+      if (index > 0) questionNumber = questionNumber - 1; // Go back a page
       globalKeys.removeAt(index);
       questionPages.removeAt(index); // Delete widget
     });
@@ -136,119 +136,173 @@ class _QuizCreatorState extends State<QuizCreator> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-            title: Text('Edit ${quiz.name}'),
-            automaticallyImplyLeading: false,
-            actions: <Widget>[
-              IconButton(
-                  onPressed: () {
-                    _switchDeleteModes();
-                  },
-                  icon: !deleteMode ? Icon(Icons.delete) : Icon(Icons.edit)),
-              TextButton.icon(
-                  label: const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                  ),
-                  icon:
-                      const Text('Done', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    await _saveQuiz();
-                    Navigator.pushNamed(context, '/home');
-                  })
-            ]),
-        resizeToAvoidBottomInset: false,
-        body: Column(children: [
-          Container(
-              padding: const EdgeInsets.all(20),
-              child:
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(
-                  "Question $questionNumber",
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                const SizedBox(width: 10),
-                deleteMode
-                    ? IconButton(
-                        onPressed: () {
-                          areYouSure(context);
-                        },
-                        icon: Icon(Icons.delete),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                      )
-                    : Container()
-              ])),
-          Expanded(
-            child: IndexedStack(
-                index: questionNumber - 1, children: questionPages),
-          )
-        ]),
-        bottomNavigationBar: BottomAppBar(
-            child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-              questionNumber > 1
-                  ? TextButton.icon(
-                      icon: Icon(Icons.arrow_back),
-                      label: Text('Question ${questionNumber - 1}'),
+    return WillPopScope(
+        onWillPop: () async {
+          bool allowPop = await saveBeforeLeaving();
+          return allowPop;
+        },
+        child: Scaffold(
+            appBar: AppBar(
+                title: Text('Edit ${quiz.name}'),
+                automaticallyImplyLeading: false,
+                actions: <Widget>[
+                  IconButton(
                       onPressed: () {
-                        setState(() {
-                          questionNumber = questionNumber - 1;
-                        });
+                        _switchDeleteModes();
                       },
-                    )
-                  : Container(width: 116, height: 10),
-              IconButton(
-                  onPressed: () async {
-                    await _saveQuiz();
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => QuestionList(
-                              chosenQuiz: quiz,
-                              quizID: quizID,
-                              quizzesDB: quizzesDB)),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.list,
-                    color: Colors.blue,
-                  )),
-              TextButton.icon(
-                icon: Text('Question ${questionNumber + 1}'),
-                label: questionNumber == questionPages.length
-                    ? Icon(Icons.add)
-                    : Icon(Icons.arrow_forward),
-                onPressed: () {
-                  setState(() {
-                    if (questionNumber == questionPages.length) {
-                      globalKeys = [...globalKeys, GlobalKey()];
-
-                      questionPages = [
-                        ...questionPages,
-                        QuestionCreator(
-                            question: Question("", 0, []),
-                            appendQuestionCB: _appendQuestionCB,
-                            key: globalKeys[globalKeys.length - 1])
-                      ];
-
-                      _switchDeleteModes(sync: true);
-                    }
-                    questionNumber = questionNumber + 1;
-                  });
-                },
+                      icon:
+                          !deleteMode ? Icon(Icons.delete) : Icon(Icons.edit)),
+                  TextButton.icon(
+                      label: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                      ),
+                      icon: const Text('Done',
+                          style: TextStyle(color: Colors.white)),
+                      onPressed: () async {
+                        await _saveQuiz();
+                        Navigator.pushNamed(context, '/home');
+                      })
+                ]),
+            resizeToAvoidBottomInset: false,
+            body: Column(children: [
+              Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Question $questionNumber",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        deleteMode
+                            ? IconButton(
+                                onPressed: () {
+                                  if (questionPages.length > 1) {
+                                    areYouSure(context);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                "You need at least one question.")));
+                                  }
+                                },
+                                icon: const Icon(Icons.delete),
+                                padding: EdgeInsets.zero,
+                                constraints: BoxConstraints(),
+                              )
+                            : Container()
+                      ])),
+              Expanded(
+                child: IndexedStack(
+                    index: questionNumber - 1, children: questionPages),
               )
-            ])),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.save),
-            onPressed: () {
-              _saveQuiz();
-            }));
+            ]),
+            bottomNavigationBar: BottomAppBar(
+                child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                  questionNumber > 1
+                      ? TextButton.icon(
+                          icon: Icon(Icons.arrow_back),
+                          label: Text('Question ${questionNumber - 1}'),
+                          onPressed: () {
+                            setState(() {
+                              questionNumber = questionNumber - 1;
+                            });
+                          },
+                        )
+                      : Container(width: 116, height: 10),
+                  IconButton(
+                      onPressed: () async {
+                        await _saveQuiz();
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => QuestionList(
+                                  chosenQuiz: quiz,
+                                  quizID: quizID,
+                                  quizzesDB: quizzesDB)),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.list,
+                        color: Colors.blue,
+                      )),
+                  TextButton.icon(
+                    icon: Text('Question ${questionNumber + 1}'),
+                    label: questionNumber == questionPages.length
+                        ? Icon(Icons.add)
+                        : Icon(Icons.arrow_forward),
+                    onPressed: () {
+                      setState(() {
+                        if (questionNumber == questionPages.length) {
+                          globalKeys = [...globalKeys, GlobalKey()];
+
+                          questionPages = [
+                            ...questionPages,
+                            QuestionCreator(
+                                question: Question("", 0, []),
+                                appendQuestionCB: _appendQuestionCB,
+                                key: globalKeys[globalKeys.length - 1])
+                          ];
+
+                          _switchDeleteModes(sync: true);
+                        }
+                        questionNumber = questionNumber + 1;
+                      });
+                    },
+                  )
+                ])),
+            floatingActionButton: FloatingActionButton(
+                child: const Icon(Icons.save),
+                onPressed: () {
+                  _saveQuiz();
+                })));
+  }
+
+  saveBeforeLeaving() async {
+    bool allowPop = false;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Save progress?"),
+          content: const Text("Would you like to save before leaving?"),
+          actions: [
+            TextButton(
+              child: const Text("CANCEL"),
+              onPressed: () {
+                allowPop = false;
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: const Text("NO"),
+              onPressed: () {
+                allowPop = true;
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: const Text("YES"),
+              onPressed: () async {
+                await _saveQuiz();
+                allowPop = true;
+                Navigator.pop(context);
+              },
+            )
+          ],
+        );
+      },
+    );
+
+    return allowPop;
   }
 
   areYouSure(BuildContext context) {

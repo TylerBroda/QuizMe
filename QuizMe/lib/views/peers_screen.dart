@@ -102,9 +102,8 @@ class _PeersScreenState extends State<PeersScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: Icon(Icons.person_add_alt_1),
           onPressed: () async {
-            //Todo: Adding a validator for checking if the person exists in the db
             _showDialog(context);
           }),
     );

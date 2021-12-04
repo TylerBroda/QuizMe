@@ -378,7 +378,7 @@ class _TutorScreenState extends State<TutorScreen> {
                       );
                     });
               },
-              child: const Icon(Icons.add)),
+              child: const Icon(Icons.add_location_alt)),
     );
   }
 

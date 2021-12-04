@@ -27,7 +27,6 @@ class MyQuizzes extends StatefulWidget {
 }
 
 // Will list your quizzes that you made
-
 class _MyQuizzesState extends State<MyQuizzes> {
   late List<QuizInfo> _quizzes;
   bool loadedQuizzes = false;
