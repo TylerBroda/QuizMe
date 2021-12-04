@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quizme/utils/auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/plugin_api.dart';
@@ -7,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import '../model/db_user.dart';
 
 class TutorScreen extends StatefulWidget {
   const TutorScreen({Key? key}) : super(key: key);
@@ -16,7 +18,9 @@ class TutorScreen extends StatefulWidget {
 }
 
 class _TutorScreenState extends State<TutorScreen> {
+
   final tutorData = FirebaseFirestore.instance.collection('tutors');
+  var userDB = FirebaseFirestore.instance.collection('users');
 
   List<Marker> tutors = [];
 
@@ -272,6 +276,8 @@ class _TutorScreenState extends State<TutorScreen> {
                                     ' - ' +
                                     phoneController.text.substring(6, 10);
 
+                                DBUser? user = await getAuthedUser();
+
                                 Map<String, dynamic> insertRow = {
                                   "Name": nameController.text,
                                   "Subject": subjectController.text,
@@ -280,7 +286,8 @@ class _TutorScreenState extends State<TutorScreen> {
                                   "Email": emailController.text,
                                   "Address": _address,
                                   "Description": descriptionController.text,
-                                  "Location": GeoPoint(lat, long)
+                                  "Location": GeoPoint(lat, long),
+                                  "User": user!.username
                                 };
                                 await tutorData.add(insertRow);
 
@@ -313,6 +320,7 @@ class _TutorScreenState extends State<TutorScreen> {
   }
 
   Future<void> getTutors() async {
+    DBUser? user = await getAuthedUser();
     await FirebaseFirestore.instance.collection('tutors').get().then((result) {
       if (result.docs.isNotEmpty) {
         List<Marker> updatedTutors = [];
@@ -336,7 +344,7 @@ class _TutorScreenState extends State<TutorScreen> {
                   },
                   icon: const Icon(Icons.location_on),
                   iconSize: 30.0,
-                  color: Colors.blueAccent,
+                  color: e.data()['User'] == user!.username ?  Colors.redAccent : Colors.blueAccent,
                 );
               },
               point: LatLng(e.data()['Location'].latitude,
