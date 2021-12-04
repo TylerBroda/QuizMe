@@ -31,7 +31,6 @@ class MyQuizzes extends StatefulWidget {
 class _MyQuizzesState extends State<MyQuizzes> {
   late List<QuizInfo> _quizzes;
   bool loadedQuizzes = false;
-  int _selectedIndex = -1;
 
   var quizzesDB = FirebaseFirestore.instance.collection('quizzes');
 
@@ -50,20 +49,7 @@ class _MyQuizzesState extends State<MyQuizzes> {
                 MaterialPageRoute(builder: (context) => InitializeQuiz()),
               );
             },
-            // label: const Text(''),
             child: const Icon(Icons.add)));
-
-    //       Column(
-    //   // crossAxisAlignment: CrossAxisAlignment.center,
-    //   mainAxisAlignment: MainAxisAlignment.center,
-    //   children: [
-    //     Center(child: Text("No quizzes made yet")),
-    //     ElevatedButton(
-    //
-    //       child: Text("Create quiz"),
-    //     )
-    //   ],
-    // );
   }
 
   void loadQuizzes() async {
