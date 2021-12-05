@@ -83,16 +83,6 @@ class _MyQuizzesState extends State<MyQuizzes> {
 
                   return GestureDetector(
                       onTap: () async {
-                        Quiz chosenQuiz = Quiz(
-                            chosenQuizSnapshot['Name'],
-                            chosenQuizSnapshot['Category'],
-                            chosenQuizSnapshot['Questions']
-                                .map<Question>((questionDoc) => Question(
-                                    questionDoc['Question'],
-                                    questionDoc['CorrectOptionIndex'],
-                                    questionDoc['Options'].cast<String>()))
-                                .toList());
-
                         Navigator.push(
                           context,
                           MaterialPageRoute(

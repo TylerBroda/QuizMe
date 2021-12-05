@@ -31,24 +31,7 @@ class _PeersScreenState extends State<PeersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.start,
-            //   children: [
-            //     CircleAvatar(
-            //       backgroundColor: Colors.brown,
-            //       child: Text(
-            //         mainuser[0].toUpperCase(),
-            //         style:
-            //             TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            //       ),
-            //     ),
-            //     SizedBox(
-            //       width: 20,
-            //     ),
-            Text("Peers List"),
-        // ],
-        // ),
+        title: const Text("Peers List"),
         actions: [
           IconButton(
             onPressed: () {
