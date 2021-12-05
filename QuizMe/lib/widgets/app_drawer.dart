@@ -1,12 +1,14 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:quizme/utils/app_colors.dart';
 import 'package:quizme/model/db_user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppDrawer extends StatefulWidget {
-  const AppDrawer({Key? key}) : super(key: key);
+  const AppDrawer({Key key}) : super(key: key);
 
   @override
   _AppDrawerState createState() => _AppDrawerState();
@@ -15,8 +17,8 @@ class AppDrawer extends StatefulWidget {
 // wrap this in a SizedBox with width: MediaQuery.of(context).size.width * 0.75 to change drawer width
 // use the person's pfp
 class _AppDrawerState extends State<AppDrawer> {
-  String? username = 'Admin';
-  String? email = 'Admin';
+  String username = 'Admin';
+  String email = 'Admin';
   @override
   void initState() {
     super.initState();
@@ -42,7 +44,7 @@ class _AppDrawerState extends State<AppDrawer> {
               Center(
                 child: CircleAvatar(
                   child: Text(
-                    username![0].toUpperCase(),
+                    username[0].toUpperCase(),
                     style: TextStyle(fontSize: 40, color: Colors.white),
                   ),
                   backgroundColor: Colors.red,
@@ -53,18 +55,25 @@ class _AppDrawerState extends State<AppDrawer> {
                 margin: EdgeInsets.only(top: 12, bottom: 2),
                 child: Center(
                   child: Text(
-                    username!,
+                    username,
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
               ),
               Center(
                 child: Text(
-                  email!,
+                  email,
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
               Spacer(),
+              ListTile(
+                leading: Icon(Icons.settings),
+                onTap: () {
+                  _showDialog(context);
+                },
+                title: Text("Change Email"),
+              ),
               ListTile(
                 leading: Icon(Icons.settings),
                 title: Text("Settings"),
@@ -84,7 +93,7 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   Future<void> retUser() async {
-    DBUser? user = await getAuthedUser();
+    DBUser user = await getAuthedUser();
 
     if (user != null) {
       setState(() {
@@ -122,5 +131,80 @@ class _AppDrawerState extends State<AppDrawer> {
         );
       },
     );
+  }
+
+  _showDialog(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    String input;
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Form(
+            key: _formKey,
+            child: SimpleDialog(
+                title: Center(
+                  child: Text("Change Email"),
+                ),
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(left: 30, right: 30),
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Missing email";
+                        }
+                        if (!value.contains("@")) {
+                          return "invalid email";
+                        }
+                        if (value.contains(" ")) {
+                          return "invalid email, can't contain spaces";
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        input = value;
+                      },
+                      decoration: InputDecoration(labelText: "Enter New Email"),
+                    ),
+                  ),
+                  Container(
+                      padding: EdgeInsets.only(left: 40, right: 40),
+                      width: 200,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            if (_formKey.currentState.validate()) {
+                              _formKey.currentState.save();
+                              updateUser(input);
+                            }
+                          });
+                        },
+                        icon: Icon(Icons.login),
+                        label: Text("Submit"),
+                      )),
+                ]));
+      },
+    );
+  }
+
+  Future<void> updateUser(String nEmail) async {
+    String docid;
+    var userDB = FirebaseFirestore.instance.collection('users');
+    var usersSnapshot = await userDB.where('Email', isEqualTo: nEmail).get();
+    if (usersSnapshot.size > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              "Email already exists.",
+              textAlign: TextAlign.start,
+            ),
+            backgroundColor: Colors.red),
+      );
+    } else {
+      /*
+      Todo: Update Email
+      */
+    }
   }
 }

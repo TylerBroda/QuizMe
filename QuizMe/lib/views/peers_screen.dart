@@ -65,6 +65,16 @@ class _PeersScreenState extends State<PeersScreen> {
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData)
             return const Center(child: CircularProgressIndicator());
+          if (snapshot.data.docs.length == 0) {
+            return Card(
+                child: Column(children: [
+              ListTile(
+                title: Text("No Peers Added",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              )
+            ]));
+          }
           return ListView.builder(
               padding: EdgeInsets.only(top: 10),
               itemCount: snapshot.data.docs.length,
@@ -142,14 +152,17 @@ class _PeersScreenState extends State<PeersScreen> {
                       onSaved: (value) {
                         input = value;
                       },
-                      decoration: const InputDecoration(labelText: "Enter Username"),
+                      decoration:
+                          const InputDecoration(labelText: "Enter Username"),
                     ),
                   ),
                   Container(
                       padding: const EdgeInsets.only(left: 40, right: 40),
                       width: 200,
                       child: ElevatedButton.icon(
-                        style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFf85f6a))),
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateColor.resolveWith(
+                                (states) => const Color(0xFFf85f6a))),
                         onPressed: () {
                           setState(() {
                             if (_formKey.currentState.validate()) {
@@ -157,7 +170,6 @@ class _PeersScreenState extends State<PeersScreen> {
                               addpeer(input);
                               Navigator.pop(context);
                             }
-                           
                           });
                         },
                         icon: Icon(Icons.login),
