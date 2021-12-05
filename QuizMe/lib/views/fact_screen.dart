@@ -5,6 +5,7 @@ import 'package:quizme/widgets/app_drawer.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class FactScreen extends StatefulWidget {
   const FactScreen({Key? key}) : super(key: key);
@@ -50,12 +51,14 @@ class _FactScreenState extends State<FactScreen> {
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 28),
                         ),
-                        const SizedBox(height: 20),
-                        Center(
-                          child: Text(
-                            fact,
-                            style: const TextStyle(
-                                fontSize: 20, overflow: TextOverflow.clip),
+                        SizedBox(
+                          height: (MediaQuery.of(context).size.height - appBar.preferredSize.height) / 2,
+                          child: Center(
+                            child: AutoSizeText(
+                              fact,
+                              style: const TextStyle(
+                                  fontSize: 20, overflow: TextOverflow.clip),
+                            ),
                           ),
                         ),
                       ],
