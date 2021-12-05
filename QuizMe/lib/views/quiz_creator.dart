@@ -153,6 +153,7 @@ class _QuizCreatorState extends State<QuizCreator> {
         },
         child: Scaffold(
           appBar: AppBar(
+              backgroundColor: const Color(0xFFf85f6a),
               title: Text('Edit ${quiz.name}'),
               automaticallyImplyLeading: false,
               actions: <Widget>[
@@ -213,14 +214,15 @@ class _QuizCreatorState extends State<QuizCreator> {
             )
           ]),
           bottomNavigationBar: BottomAppBar(
+              color: const Color(0xFFf85f6a),
               child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                 questionNumber > 1
                     ? TextButton.icon(
-                        icon: Icon(Icons.arrow_back),
-                        label: Text('Question ${questionNumber - 1}'),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        label: Text('Question ${questionNumber - 1}', style: const TextStyle(color: Colors.white),),
                         onPressed: () {
                           setState(() {
                             questionNumber = questionNumber - 1;
@@ -239,13 +241,13 @@ class _QuizCreatorState extends State<QuizCreator> {
                     },
                     icon: const Icon(
                       Icons.list,
-                      color: Colors.blue,
+                      color: Colors.white,
                     )),
                 TextButton.icon(
-                  icon: Text('Question ${questionNumber + 1}'),
+                  icon: Text('Question ${questionNumber + 1}', style: const TextStyle(color: Colors.white),),
                   label: questionNumber == questionPages.length
-                      ? Icon(Icons.add)
-                      : Icon(Icons.arrow_forward),
+                      ? Icon(Icons.add, color: Colors.white)
+                      : Icon(Icons.arrow_forward, color: Colors.white),
                   onPressed: () {
                     setState(() {
                       if (questionNumber == questionPages.length) {

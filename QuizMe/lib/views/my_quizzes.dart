@@ -45,6 +45,7 @@ class _MyQuizzesState extends State<MyQuizzes> {
     return Scaffold(
         appBar: AppBar(
           title: const Text("My Quizzes"),
+          backgroundColor: Color(0xFFf85f6a),
         ),
         drawer: const AppDrawer(),
         body: getMyQuizzesBody(),
@@ -57,6 +58,7 @@ class _MyQuizzesState extends State<MyQuizzes> {
                         quizID: "none", quizName: "", prevTopic: "")),
               );
             },
+            backgroundColor: Color(0xFFf85f6a),
             child: const Icon(Icons.add)));
   }
 

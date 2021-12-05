@@ -132,6 +132,7 @@ class _TutorScreenState extends State<TutorScreen> {
               },
               icon: const Icon(Icons.delete))
         ],
+        backgroundColor: const Color(0xFFf85f6a),
       ),
       drawer: const AppDrawer(),
       body: !mapIsLoaded
@@ -153,6 +154,7 @@ class _TutorScreenState extends State<TutorScreen> {
       floatingActionButton: !mapIsLoaded
           ? null
           : FloatingActionButton(
+              backgroundColor: const Color(0xFFf85f6a),
               onPressed: () async {
                 //Retrieving location & address
                 var position = await _getCurrentPosition();
@@ -365,12 +367,9 @@ class _TutorScreenState extends State<TutorScreen> {
                                 MaterialStateProperty.resolveWith<Color>(
                               (Set<MaterialState> states) {
                                 if (states.contains(MaterialState.pressed)) {
-                                  return Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.5);
+                                  return const Color(0xFFf85f6a).withOpacity(0.5);
                                 }
-                                return Colors.blue;
+                                return const Color(0xFFf85f6a);
                               },
                             )),
                           )

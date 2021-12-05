@@ -24,6 +24,7 @@ class _FactScreenState extends State<FactScreen> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Interesting Facts'),
+          backgroundColor: const Color(0xFFf85f6a),
         ),
         drawer: const AppDrawer(),
         body: FutureBuilder(
@@ -74,6 +75,7 @@ class _FactScreenState extends State<FactScreen> {
                 getData();
               });
             },
+            backgroundColor: const Color(0xFFf85f6a),
             label: const Text("New Fact"),
             icon: const Icon(Icons.refresh)));
   }

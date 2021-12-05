@@ -83,14 +83,16 @@ class _QuizGameState extends State<QuizGame> {
       initQuiz();
       return Scaffold(
           appBar: AppBar(
-            title: Text("QuizMe"),
+            backgroundColor: const Color(0xFFf85f6a),
+            title: const Text("QuizMe"),
             automaticallyImplyLeading: false,
           ),
           body: const Center(child: CircularProgressIndicator()));
     } else {
       return Scaffold(
           appBar: AppBar(
-              title: Text("QuizMe"),
+              backgroundColor: const Color(0xFFf85f6a),
+              title: const Text("QuizMe"),
               automaticallyImplyLeading: false,
               actions: <Widget>[
                 TextButton.icon(

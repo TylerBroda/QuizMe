@@ -40,6 +40,7 @@ class _PeersScreenState extends State<PeersScreen> {
             icon: Icon(Icons.delete),
           ),
         ],
+        backgroundColor: const Color(0xFFf85f6a),
       ),
       drawer: const AppDrawer(),
       body: StreamBuilder(
@@ -47,6 +48,16 @@ class _PeersScreenState extends State<PeersScreen> {
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData)
             return const Center(child: CircularProgressIndicator());
+          if (snapshot.data.docs.length == 0) {
+            return Card(
+                child: Column(children: [
+              ListTile(
+                title: Text("No Peers Added",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              )
+            ]));
+          }
           return ListView.builder(
               padding: EdgeInsets.only(top: 10),
               itemCount: snapshot.data.docs.length,
@@ -55,7 +66,7 @@ class _PeersScreenState extends State<PeersScreen> {
                 return Card(
                     child: Card(
                         color: _selectedIndx == index
-                            ? Colors.amber
+                            ? Colors.cyanAccent.shade100.withOpacity(0.9)
                             : Colors.white,
                         child: Column(
                           children: [
@@ -85,6 +96,7 @@ class _PeersScreenState extends State<PeersScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+          backgroundColor: const Color(0xFFf85f6a),
           child: Icon(Icons.person_add_alt_1),
           onPressed: () async {
             _showDialog(context);
@@ -101,7 +113,7 @@ class _PeersScreenState extends State<PeersScreen> {
         return Form(
             key: _formKey,
             child: SimpleDialog(
-                title: Center(
+                title: const Center(
                   child: Text("ADD FRIEND"),
                 ),
                 children: [
@@ -123,18 +135,23 @@ class _PeersScreenState extends State<PeersScreen> {
                       onSaved: (value) {
                         input = value;
                       },
-                      decoration: InputDecoration(labelText: "Enter Username"),
+                      decoration:
+                          const InputDecoration(labelText: "Enter Username"),
                     ),
                   ),
                   Container(
-                      padding: EdgeInsets.only(left: 40, right: 40),
+                      padding: const EdgeInsets.only(left: 40, right: 40),
                       width: 200,
                       child: ElevatedButton.icon(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateColor.resolveWith(
+                                (states) => const Color(0xFFf85f6a))),
                         onPressed: () {
                           setState(() {
                             if (_formKey.currentState.validate()) {
                               _formKey.currentState.save();
                               addpeer(input);
+                              Navigator.pop(context);
                             }
                           });
                         },

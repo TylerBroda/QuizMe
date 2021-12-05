@@ -100,6 +100,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           ),
           const SizedBox(width: 20)
         ],
+        backgroundColor: const Color(0xFFf85f6a),
       ),
       drawer: const AppDrawer(),
       resizeToAvoidBottomInset: false,
@@ -155,8 +156,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       // });
                     },
                     child: Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 8),
                         child: Card(
+                          elevation: 3,
                           color: (_selectedIndex == index)
                               ? Colors.blue
                               : Colors.white,

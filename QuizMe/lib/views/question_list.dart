@@ -49,6 +49,7 @@ class _QuestionListState extends State<QuestionList> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+            backgroundColor: const Color(0xFFf85f6a),
             title: StreamBuilder(
                 stream: quizzesDB.doc(quizID).snapshots(),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -97,8 +98,9 @@ class _QuestionListState extends State<QuestionList> {
               } else {
                 var quiz = snapshot.data;
 
-                if (quiz == null)
-                  return Center(child: Text("No questions made yet."));
+                if (quiz == null) {
+                  return const Center(child: Text("No questions made yet."));
+                }
 
                 int questionAmount = quiz["Questions"].length;
 
@@ -149,6 +151,7 @@ class _QuestionListState extends State<QuestionList> {
               }
             }),
         floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: const Color(0xFFf85f6a),
             onPressed: () {
               Navigator.pushNamed(
                 context,
