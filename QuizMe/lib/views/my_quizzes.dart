@@ -96,9 +96,8 @@ class _MyQuizzesState extends State<MyQuizzes> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => QuestionList(
-                                  chosenQuiz: chosenQuiz,
-                                  quizID: chosenQuizSnapshot.id)),
+                              builder: (context) =>
+                                  QuestionList(quizID: chosenQuizSnapshot.id)),
                         );
                       },
                       child: Container(
