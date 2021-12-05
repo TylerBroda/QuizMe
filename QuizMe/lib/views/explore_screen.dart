@@ -114,8 +114,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
           //Filter for completed quizzes
           filterDocs = filterDocs.where((element) {
-            return element
-                .get('isComplete') == true;
+            return element.get('isComplete') == true;
           }).toList();
 
           //Filter quizzes by dropdown selection
@@ -146,7 +145,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 final docData = filterDocs[index].data() as Map;
                 return GestureDetector(
                     onTap: () {
-                      String quizID = snapshot.data!.docs[index].id;
+                      String quizID = filterDocs[index].id;
                       print(quizID);
                       Navigator.pushNamed(context, '/quizgame',
                           arguments: QuizScreenArguments(quizID));
