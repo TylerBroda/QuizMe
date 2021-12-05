@@ -1,37 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:quizme/utils/categories.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import './quiz_creator.dart';
 import '../model/quiz.dart';
 
 class InitializeQuiz extends StatefulWidget {
-  const InitializeQuiz(
-      {Key? key,
-      required this.quizName,
-      required this.prevTopic,
-      required this.rename})
-      : super(key: key);
+  const InitializeQuiz({
+    Key? key,
+    required this.quizID,
+    required this.quizName,
+    required this.prevTopic,
+  }) : super(key: key);
 
+  final String quizID;
   final String quizName;
   final String prevTopic;
-  final bool rename;
 
   @override
   _InitializeQuizState createState() => _InitializeQuizState(
-      quizName: this.quizName, prevTopic: this.prevTopic, rename: this.rename);
+        quizID: this.quizID,
+        quizName: this.quizName,
+        prevTopic: this.prevTopic,
+      );
 }
 
 class _InitializeQuizState extends State<InitializeQuiz> {
   final _formKey = GlobalKey<FormState>();
-
+  final String quizID;
   final String quizName;
   final String prevTopic;
-  final bool rename;
+
+  CollectionReference quizzesDB =
+      FirebaseFirestore.instance.collection('quizzes');
 
   final List<String> _items = CATEGORIES;
   String topic = CATEGORIES[0];
 
-  _InitializeQuizState(
-      {required this.quizName, required this.prevTopic, required this.rename});
+  _InitializeQuizState({
+    required this.quizID,
+    required this.quizName,
+    required this.prevTopic,
+  });
 
   TextEditingController quizNameController = TextEditingController();
 
@@ -43,7 +52,10 @@ class _InitializeQuizState extends State<InitializeQuiz> {
     if (prevTopic != "") topic = prevTopic;
   }
 
-  renameQuiz() {
+  renameQuiz() async {
+    await quizzesDB
+        .doc(quizID)
+        .update({'Name': quizNameController.text, 'Category': topic});
     Navigator.pop(context);
   }
 
@@ -51,8 +63,9 @@ class _InitializeQuizState extends State<InitializeQuiz> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title:
-                rename ? const Text("Rename Quiz") : const Text("Create Quiz")),
+            title: quizID == "none"
+                ? const Text("Create Quiz")
+                : const Text("Rename Quiz")),
         resizeToAvoidBottomInset: false,
         body: Center(
             child: SafeArea(
@@ -101,9 +114,8 @@ class _InitializeQuizState extends State<InitializeQuiz> {
                               ElevatedButton(
                                   onPressed: () async {
                                     if (_formKey.currentState!.validate()) {
-                                      rename
-                                          ? renameQuiz()
-                                          : Navigator.pushReplacement(
+                                      quizID == "none"
+                                          ? Navigator.pushReplacement(
                                               context,
                                               MaterialPageRoute(
                                                   builder: (context) =>
@@ -116,12 +128,13 @@ class _InitializeQuizState extends State<InitializeQuiz> {
                                                             []),
                                                         quizID: "none",
                                                       )),
-                                            );
+                                            )
+                                          : renameQuiz();
                                     }
                                   },
-                                  child: rename
-                                      ? const Text("Rename")
-                                      : const Text("Continue"))
+                                  child: quizID == "none"
+                                      ? const Text("Continue")
+                                      : const Text("Rename"))
                             ],
                           ),
                         ))))));
