@@ -57,6 +57,7 @@ class _PeersScreenState extends State<PeersScreen> {
             icon: Icon(Icons.delete),
           ),
         ],
+        backgroundColor: const Color(0xFFf85f6a),
       ),
       drawer: const AppDrawer(),
       body: StreamBuilder(
@@ -102,6 +103,7 @@ class _PeersScreenState extends State<PeersScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+          backgroundColor: const Color(0xFFf85f6a),
           child: Icon(Icons.person_add_alt_1),
           onPressed: () async {
             _showDialog(context);
@@ -118,7 +120,7 @@ class _PeersScreenState extends State<PeersScreen> {
         return Form(
             key: _formKey,
             child: SimpleDialog(
-                title: Center(
+                title: const Center(
                   child: Text("ADD FRIEND"),
                 ),
                 children: [
@@ -140,13 +142,14 @@ class _PeersScreenState extends State<PeersScreen> {
                       onSaved: (value) {
                         input = value;
                       },
-                      decoration: InputDecoration(labelText: "Enter Username"),
+                      decoration: const InputDecoration(labelText: "Enter Username"),
                     ),
                   ),
                   Container(
-                      padding: EdgeInsets.only(left: 40, right: 40),
+                      padding: const EdgeInsets.only(left: 40, right: 40),
                       width: 200,
                       child: ElevatedButton.icon(
+                        style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFf85f6a))),
                         onPressed: () {
                           setState(() {
                             if (_formKey.currentState.validate()) {

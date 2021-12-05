@@ -63,9 +63,10 @@ class _InitializeQuizState extends State<InitializeQuiz> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title: quizID == "none"
-                ? const Text("Create Quiz")
-                : const Text("Rename Quiz")),
+          backgroundColor: const Color(0xFFf85f6a),
+          title: quizID == "none"
+              ? const Text("Create Quiz")
+              : const Text("Rename Quiz")),
         resizeToAvoidBottomInset: false,
         body: Center(
             child: SafeArea(
@@ -75,6 +76,7 @@ class _InitializeQuizState extends State<InitializeQuiz> {
                     child: Form(
                         key: _formKey,
                         child: Card(
+                          elevation: 2,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -112,6 +114,7 @@ class _InitializeQuizState extends State<InitializeQuiz> {
                                     },
                                   )),
                               ElevatedButton(
+                                  style: ButtonStyle(backgroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFf85f6a))),
                                   onPressed: () async {
                                     if (_formKey.currentState!.validate()) {
                                       quizID == "none"
