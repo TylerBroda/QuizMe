@@ -15,13 +15,13 @@ class QuestionCreator extends StatefulWidget {
 }
 
 class QuestionCreatorState extends State<QuestionCreator> {
-  int correctOptionIndex = 0;
   Question question;
   final Function appendQuestionCB;
 
   QuestionCreatorState(
       {required this.question, required this.appendQuestionCB});
 
+  int correctOptionIndex = 0;
   TextEditingController questionController = TextEditingController();
   bool deleteMode = false;
 
@@ -55,6 +55,7 @@ class QuestionCreatorState extends State<QuestionCreator> {
     _editOptions = List.generate(optionsAmount, (i) => TextEditingController());
 
     if (question.options.isNotEmpty) {
+      correctOptionIndex = question.correctOptionIndex;
       for (int i = 0; i < _editOptions.length; i++) {
         _editOptions[i].text = question.options[i];
       }

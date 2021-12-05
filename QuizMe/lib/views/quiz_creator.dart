@@ -130,8 +130,9 @@ class _QuizCreatorState extends State<QuizCreator> {
       await quizzesDB.doc(quizID).update(quizData);
     }
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Saved ${quiz.name}.")));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: const Duration(seconds: 1),
+        content: Text("Saved ${quiz.name}.")));
   }
 
   @override
