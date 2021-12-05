@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: false,
       body: views[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Color(0xFFf85f6a),
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(

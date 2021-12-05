@@ -73,7 +73,7 @@ class _PeersScreenState extends State<PeersScreen> {
                 return Card(
                     child: Card(
                         color: _selectedIndx == index
-                            ? Colors.amber
+                            ? Colors.cyanAccent.shade100.withOpacity(0.9)
                             : Colors.white,
                         child: Column(
                           children: [
@@ -155,7 +155,9 @@ class _PeersScreenState extends State<PeersScreen> {
                             if (_formKey.currentState.validate()) {
                               _formKey.currentState.save();
                               addpeer(input);
+                              Navigator.pop(context);
                             }
+                           
                           });
                         },
                         icon: Icon(Icons.login),
