@@ -149,15 +149,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     backgroundColor: Colors.green),
                               );
-                              var result =
-                                  await Navigator.pushReplacementNamed(context, '/home');
+                              var result = await Navigator.pushReplacementNamed(
+                                  context, '/home');
                             } else {
                               print("validation failed");
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     duration: Duration(seconds: 5),
                                     content: Text(
-                                      "The Email you entered does not exist. Please check that you have typed your Email and Password correctly.",
+                                      "The e-mail/password combination you entered does not exist. Please check that you have typed your E-mail and Password correctly.",
                                       textAlign: TextAlign.center,
                                     ),
                                     backgroundColor: Colors.red),

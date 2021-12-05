@@ -11,7 +11,8 @@ Future<DBUser?> getAuthedUser() async {
 
     if (usersSnapshot.size > 0) {
       var userData = usersSnapshot.docs[0].data();
-      DBUser dbUser = DBUser(user.uid, userData['Email'], userData['Username']);
+      DBUser dbUser = DBUser(usersSnapshot.docs[0].id, user.uid,
+          userData['Email'], userData['Username']);
       return dbUser;
     }
   }

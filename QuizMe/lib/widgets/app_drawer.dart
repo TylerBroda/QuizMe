@@ -70,13 +70,16 @@ class _AppDrawerState extends State<AppDrawer> {
               ListTile(
                 leading: Icon(Icons.settings),
                 onTap: () {
-                  _showDialog(context);
+                  _showUpdateEmailDialog(context);
                 },
                 title: Text("Change Email"),
               ),
               ListTile(
                 leading: Icon(Icons.settings),
-                title: Text("Settings"),
+                onTap: () {
+                  _showUpdatePasswordDialog(context);
+                },
+                title: Text("Change Password"),
               ),
               ListTile(
                 leading: Icon(Icons.logout),
@@ -133,9 +136,10 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  _showDialog(BuildContext context) {
+  _showUpdateEmailDialog(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
-    String input;
+    String newEmail;
+    String password;
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -147,26 +151,49 @@ class _AppDrawerState extends State<AppDrawer> {
                 ),
                 children: [
                   Container(
-                    padding: EdgeInsets.only(left: 30, right: 30),
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Missing email";
-                        }
-                        if (!value.contains("@")) {
-                          return "invalid email";
-                        }
-                        if (value.contains(" ")) {
-                          return "invalid email, can't contain spaces";
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        input = value;
-                      },
-                      decoration: InputDecoration(labelText: "Enter New Email"),
-                    ),
-                  ),
+                      padding: EdgeInsets.only(left: 30, right: 30),
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Missing email";
+                              }
+                              if (!value.contains("@")) {
+                                return "invalid email";
+                              }
+                              if (value.contains(" ")) {
+                                return "invalid email, can't contain spaces";
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              newEmail = value;
+                            },
+                            decoration:
+                                InputDecoration(labelText: "Enter New Email"),
+                          ),
+                          SizedBox(height: 8.0),
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Missing password";
+                              }
+                              if (value.length < 7) {
+                                return 'Password must contain 7 characters';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              password = value;
+                            },
+                            obscureText: true,
+                            decoration:
+                                InputDecoration(labelText: "Enter Password"),
+                          ),
+                          SizedBox(height: 8.0),
+                        ],
+                      )),
                   Container(
                       padding: EdgeInsets.only(left: 40, right: 40),
                       width: 200,
@@ -175,7 +202,12 @@ class _AppDrawerState extends State<AppDrawer> {
                           setState(() {
                             if (_formKey.currentState.validate()) {
                               _formKey.currentState.save();
-                              updateUser(input);
+                              updateEmail(newEmail, password).then((value) {
+                                if (value) {
+                                  Navigator.pop(context);
+                                  retUser();
+                                }
+                              });
                             }
                           });
                         },
@@ -187,24 +219,203 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  Future<void> updateUser(String nEmail) async {
-    String docid;
+  _showUpdatePasswordDialog(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    String oldPassword;
+    String newPassword;
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Form(
+            key: _formKey,
+            child: SimpleDialog(
+                title: Center(
+                  child: Text("Change Password"),
+                ),
+                children: [
+                  Container(
+                      padding: EdgeInsets.only(left: 30, right: 30),
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Missing password";
+                              }
+                              if (value.length < 7) {
+                                return 'Password must contain 7 characters';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              oldPassword = value;
+                            },
+                            obscureText: true,
+                            decoration: InputDecoration(
+                                labelText: "Enter Current Password"),
+                          ),
+                          SizedBox(height: 8.0),
+                          TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Missing password";
+                              }
+                              if (value.length < 7) {
+                                return 'Password must contain 7 characters';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              newPassword = value;
+                            },
+                            obscureText: true,
+                            decoration: InputDecoration(
+                                labelText: "Enter New Password"),
+                          ),
+                          SizedBox(height: 8.0),
+                        ],
+                      )),
+                  Container(
+                      padding: EdgeInsets.only(left: 40, right: 40),
+                      width: 200,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            if (_formKey.currentState.validate()) {
+                              _formKey.currentState.save();
+                              updatePassword(oldPassword, newPassword)
+                                  .then((value) {
+                                if (value) {
+                                  Navigator.pop(context);
+                                  retUser();
+                                }
+                              });
+                            }
+                          });
+                        },
+                        icon: Icon(Icons.login),
+                        label: Text("Submit"),
+                      )),
+                ]));
+      },
+    );
+  }
+
+  Future<bool> updateEmail(String newEmail, String password) async {
     var userDB = FirebaseFirestore.instance.collection('users');
-    var usersSnapshot = await userDB.where('Email', isEqualTo: nEmail).get();
-    if (usersSnapshot.size > 0) {
+    DBUser dbUser = await getAuthedUser();
+    AuthCredential credential =
+        EmailAuthProvider.credential(email: dbUser.email, password: password);
+
+    try {
+      await FirebaseAuth.instance.currentUser
+          .reauthenticateWithCredential(credential);
+      await FirebaseAuth.instance.currentUser.updateEmail(newEmail);
+      await userDB.doc(dbUser.docID).update({'Email': newEmail});
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
+            duration: Duration(seconds: 1),
+            content: Text(
+              "E-mail updated.",
+              textAlign: TextAlign.start,
+            ),
+            backgroundColor: Colors.green),
+      );
+
+      return true;
+    } catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case "wrong-password":
+          {
+            errorMessage = "Password is incorrect.";
+            break;
+          }
+        case "invalid-email":
+          {
+            errorMessage = "E-mail is invalid.";
+            break;
+          }
+        case "email-already-in-use":
+          {
+            errorMessage = "E-mail is already in use.";
+            break;
+          }
+        default:
+          {
+            errorMessage = "Could not update e-mail.";
+            break;
+          }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
             duration: Duration(seconds: 5),
             content: Text(
-              "Email already exists.",
+              errorMessage,
               textAlign: TextAlign.start,
             ),
             backgroundColor: Colors.red),
       );
-    } else {
-      /*
-      Todo: Update Email
-      */
     }
+
+    return false;
+  }
+
+  Future<bool> updatePassword(String oldPassword, String newPassword) async {
+    var userDB = FirebaseFirestore.instance.collection('users');
+    DBUser dbUser = await getAuthedUser();
+    AuthCredential credential = EmailAuthProvider.credential(
+        email: dbUser.email, password: oldPassword);
+
+    try {
+      await FirebaseAuth.instance.currentUser
+          .reauthenticateWithCredential(credential);
+      await FirebaseAuth.instance.currentUser.updatePassword(newPassword);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            duration: Duration(seconds: 1),
+            content: Text(
+              "Password updated.",
+              textAlign: TextAlign.start,
+            ),
+            backgroundColor: Colors.green),
+      );
+
+      return true;
+    } catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case "wrong-password":
+          {
+            errorMessage = "Password is incorrect.";
+            break;
+          }
+        case "weak-password":
+          {
+            errorMessage = "Password is too weak.";
+            break;
+          }
+        default:
+          {
+            errorMessage = "Could not update password.";
+            break;
+          }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            duration: Duration(seconds: 5),
+            content: Text(
+              errorMessage,
+              textAlign: TextAlign.start,
+            ),
+            backgroundColor: Colors.red),
+      );
+    }
+
+    return false;
   }
 }
