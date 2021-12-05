@@ -45,7 +45,9 @@ class _MyQuizzesState extends State<MyQuizzes> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => InitializeQuiz()),
+                MaterialPageRoute(
+                    builder: (context) => InitializeQuiz(
+                        quizName: "", prevTopic: "", rename: false)),
               );
             },
             child: const Icon(Icons.add)));
@@ -64,14 +66,21 @@ class _MyQuizzesState extends State<MyQuizzes> {
           for (int i = 0; i < quizData['Questions'].length; i++) {
             if (quizData['Questions'][i]['Question'] == "" ||
                 quizData['Questions'][i]['Options'].contains("")) {
-                  
-              quizzesDB.doc(doc.id).update({'isComplete': false}).then((value) => print('isComplete updated')).catchError((error) => print('Failed to update'));
+              quizzesDB
+                  .doc(doc.id)
+                  .update({'isComplete': false})
+                  .then((value) => print('isComplete updated'))
+                  .catchError((error) => print('Failed to update'));
               return QuizInfo(
                   doc.id, quizData['Name'], quizData['Category'], false);
             }
           }
 
-          quizzesDB.doc(doc.id).update({'isComplete': true}).then((value) => print('isComplete updated')).catchError((error) => print('Failed to update'));
+          quizzesDB
+              .doc(doc.id)
+              .update({'isComplete': true})
+              .then((value) => print('isComplete updated'))
+              .catchError((error) => print('Failed to update'));
           return QuizInfo(doc.id, quizData['Name'], quizData['Category'], true);
         }).toList();
         loadedQuizzes = true;

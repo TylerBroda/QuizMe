@@ -4,27 +4,55 @@ import './quiz_creator.dart';
 import '../model/quiz.dart';
 
 class InitializeQuiz extends StatefulWidget {
-  const InitializeQuiz({Key? key}) : super(key: key);
+  const InitializeQuiz(
+      {Key? key,
+      required this.quizName,
+      required this.prevTopic,
+      required this.rename})
+      : super(key: key);
+
+  final String quizName;
+  final String prevTopic;
+  final bool rename;
 
   @override
-  _InitializeQuizState createState() => _InitializeQuizState();
+  _InitializeQuizState createState() => _InitializeQuizState(
+      quizName: this.quizName, prevTopic: this.prevTopic, rename: this.rename);
 }
 
 class _InitializeQuizState extends State<InitializeQuiz> {
   final _formKey = GlobalKey<FormState>();
+
+  final String quizName;
+  final String prevTopic;
+  final bool rename;
+
   final List<String> _items = CATEGORIES;
   String topic = CATEGORIES[0];
 
+  _InitializeQuizState(
+      {required this.quizName, required this.prevTopic, required this.rename});
+
   TextEditingController quizNameController = TextEditingController();
 
-  String? quizName = "";
+  @override
+  void initState() {
+    super.initState();
 
-  renameQuiz() {}
+    quizNameController.text = quizName;
+    if (prevTopic != "") topic = prevTopic;
+  }
+
+  renameQuiz() {
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("Create Quiz")),
+        appBar: AppBar(
+            title:
+                rename ? const Text("Rename Quiz") : const Text("Create Quiz")),
         resizeToAvoidBottomInset: false,
         body: Center(
             child: SafeArea(
@@ -73,20 +101,27 @@ class _InitializeQuizState extends State<InitializeQuiz> {
                               ElevatedButton(
                                   onPressed: () async {
                                     if (_formKey.currentState!.validate()) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => QuizCreator(
-                                                  questionNumber: 1,
-                                                  chosenQuiz: Quiz(
-                                                      quizNameController.text,
-                                                      topic, []),
-                                                  quizID: "none",
-                                                )),
-                                      );
+                                      rename
+                                          ? renameQuiz()
+                                          : Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      QuizCreator(
+                                                        questionNumber: 1,
+                                                        chosenQuiz: Quiz(
+                                                            quizNameController
+                                                                .text,
+                                                            topic,
+                                                            []),
+                                                        quizID: "none",
+                                                      )),
+                                            );
                                     }
                                   },
-                                  child: const Text("Continue"))
+                                  child: rename
+                                      ? const Text("Rename")
+                                      : const Text("Continue"))
                             ],
                           ),
                         ))))));

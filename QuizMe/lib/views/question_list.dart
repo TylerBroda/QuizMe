@@ -64,9 +64,13 @@ class _QuestionListState extends State<QuestionList> {
               icon: const Icon(Icons.delete)),
           IconButton(
               onPressed: () {
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => InitializeQuiz()),
+                  MaterialPageRoute(
+                      builder: (context) => InitializeQuiz(
+                          quizName: chosenQuiz.name,
+                          prevTopic: chosenQuiz.topic,
+                          rename: true)),
                 );
               },
               icon: const Icon(Icons.edit)),
