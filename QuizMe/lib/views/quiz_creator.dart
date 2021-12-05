@@ -108,6 +108,14 @@ class _QuizCreatorState extends State<QuizCreator> {
 
     DBUser? user = await getAuthedUser();
 
+    bool isComplete = true;
+    for (int i = 0; i < quiz.questions.length; i++) {
+      Question question = quiz.questions[i];
+      if (question.question == "" || question.options.contains("")) {
+        isComplete = false;
+      }
+    }
+
     var quizData = {
       "Name": quiz.name,
       "Category": quiz.topic,
@@ -118,7 +126,8 @@ class _QuizCreatorState extends State<QuizCreator> {
                 "Options": question.options
               })
           .toList(),
-      "User": user?.username
+      "User": user?.username,
+      "isComplete": isComplete
     };
 
     // If this is a brand new quiz, make a new one in the database and then stick to its new ID
@@ -225,9 +234,7 @@ class _QuizCreatorState extends State<QuizCreator> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => QuestionList(
-                                  chosenQuiz: quiz,
-                                  quizID: quizID,
-                                  quizzesDB: quizzesDB)),
+                                  chosenQuiz: quiz, quizID: quizID)),
                         );
                       },
                       icon: const Icon(

@@ -7,33 +7,24 @@ import './quiz_game.dart';
 import '../model/quiz.dart';
 
 class QuestionList extends StatefulWidget {
-  const QuestionList(
-      {Key? key,
-      required this.chosenQuiz,
-      required this.quizID,
-      required this.quizzesDB})
+  const QuestionList({Key? key, required this.chosenQuiz, required this.quizID})
       : super(key: key);
 
   final Quiz chosenQuiz;
   final String quizID;
-  final CollectionReference quizzesDB;
 
   @override
-  _QuestionListState createState() => _QuestionListState(
-      chosenQuiz: this.chosenQuiz,
-      quizID: this.quizID,
-      quizzesDB: this.quizzesDB);
+  _QuestionListState createState() =>
+      _QuestionListState(chosenQuiz: this.chosenQuiz, quizID: this.quizID);
 }
 
 class _QuestionListState extends State<QuestionList> {
   Quiz chosenQuiz;
   final String quizID;
-  CollectionReference quizzesDB;
+  CollectionReference quizzesDB =
+      FirebaseFirestore.instance.collection('quizzes');
 
-  _QuestionListState(
-      {required this.chosenQuiz,
-      required this.quizID,
-      required this.quizzesDB});
+  _QuestionListState({required this.chosenQuiz, required this.quizID});
 
   _deleteQuiz() async {
     await quizzesDB.doc(quizID).delete();
