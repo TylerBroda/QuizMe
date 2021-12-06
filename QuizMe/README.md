@@ -7,9 +7,11 @@ Welcome to QuizMe! Our new mobile study app focused on creating digital quiz set
 After cloning QuizMe, you'll need to set up your own .env file in the root path of the project to be able to access our 'Tutor' and 'Facts' screens. For our 'Tutor' screen, we recommend using MapBox for the map url and token. For 'Facts', please generate your own key from the following API: https://rapidapi.com/apininjas/api/facts-by-api-ninjas/  
 
 The format of the .env file should be as follows:
+```
 MAP_URL="URL_HERE"
-MAK_TOKEN="TOKEN_HERE"
+MAP_TOKEN="TOKEN_HERE"
 FACT_KEY="KEY_HERE"
+```
 
 ## How do I use QuizMe?
 
