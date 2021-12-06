@@ -65,7 +65,11 @@ class QuestionCreatorState extends State<QuestionCreator> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.only(
+            top: 20.0,
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(context).size.height / 3),
         itemCount: _editOptions.length + 2,
         itemBuilder: (context, index) {
           if (index == 0) {
@@ -142,6 +146,8 @@ class QuestionCreatorState extends State<QuestionCreator> {
                 child: Container(
                     margin: const EdgeInsets.all(20.0),
                     child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            primary: const Color(0xFFf85f6a)),
                         onPressed: () {
                           setState(() {
                             _editOptions = [

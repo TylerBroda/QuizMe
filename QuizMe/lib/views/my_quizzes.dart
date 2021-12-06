@@ -7,18 +7,29 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quizme/views/question_list.dart';
 import 'package:quizme/widgets/app_drawer.dart';
+import 'package:quizme/views/quiz_game.dart';
 import '../model/quiz.dart';
 import '../model/db_user.dart';
 
 class MyQuizzes extends StatefulWidget {
-  const MyQuizzes({Key? key}) : super(key: key);
+  const MyQuizzes({Key? key, required this.peerID, required this.peerName})
+      : super(key: key);
+
+  final String peerID;
+  final String peerName;
 
   @override
-  _MyQuizzesState createState() => _MyQuizzesState();
+  _MyQuizzesState createState() =>
+      _MyQuizzesState(peerID: this.peerID, peerName: this.peerName);
 }
 
 // Will list your quizzes that you made
 class _MyQuizzesState extends State<MyQuizzes> {
+  final String peerID;
+  final String peerName;
+
+  _MyQuizzesState({required this.peerID, required this.peerName});
+
   bool loadedQuizzes = false;
 
   var quizzesDB;
@@ -32,11 +43,20 @@ class _MyQuizzesState extends State<MyQuizzes> {
   void setQuizzesDB() async {
     DBUser? user = await getAuthedUser();
     if (user != null) {
-      setState(() {
-        quizzesDB = FirebaseFirestore.instance
-            .collection('quizzes')
-            .where("User", isEqualTo: user.username);
-      });
+      if (peerName == "") {
+        setState(() {
+          quizzesDB = FirebaseFirestore.instance
+              .collection('quizzes')
+              .where("User", isEqualTo: user.username);
+        });
+      } else {
+        setState(() {
+          quizzesDB = FirebaseFirestore.instance
+              .collection('quizzes')
+              .where("User", isEqualTo: peerName)
+              .where("isComplete", isEqualTo: true);
+        });
+      }
     }
   }
 
@@ -44,10 +64,12 @@ class _MyQuizzesState extends State<MyQuizzes> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("My Quizzes"),
+          title: peerName == ""
+              ? const Text("My Quizzes")
+              : Text("${peerName}'s Quizzes"),
           backgroundColor: Color(0xFFf85f6a),
         ),
-        drawer: const AppDrawer(),
+        drawer: peerID == "" ? const AppDrawer() : null,
         body: getMyQuizzesBody(),
         floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -83,50 +105,60 @@ class _MyQuizzesState extends State<MyQuizzes> {
                   var chosenQuizSnapshot = docs[index];
                   var quizData = chosenQuizSnapshot.data();
 
+                  // Hide unfinished
+
                   return GestureDetector(
                       onTap: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  QuestionList(quizID: chosenQuizSnapshot.id)),
-                        );
+                        if (peerID == "") {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => QuestionList(
+                                    quizID: chosenQuizSnapshot.id)),
+                          );
+                        } else {
+                          Navigator.pushNamed(context, '/quizgame',
+                              arguments:
+                                  QuizScreenArguments(chosenQuizSnapshot.id));
+                        }
                       },
                       child: Container(
-                          decoration: BoxDecoration(
-                              border: Border(
-                                  bottom:
-                                      BorderSide(color: Colors.grey.shade300))),
-                          child: ListTile(
-                              title: Text(quizData['Name']),
-                              subtitle: Text(quizData['Category']),
-                              trailing: quizData['isComplete']
-                                  ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Icon(
-                                          Icons.check_circle_outline,
-                                          color: Colors.green,
-                                        ),
-                                        Text("Live",
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey)),
-                                        SizedBox(width: 90)
-                                      ],
-                                    )
-                                  : Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Icon(Icons.handyman),
-                                        Text("Work in progress",
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey))
-                                      ],
-                                    ))));
+                          padding: const EdgeInsets.only(
+                              left: 5, right: 5, top: 1, bottom: 1),
+                          child: Card(
+                              elevation: 1,
+                              child: ListTile(
+                                  title: Text(quizData['Name']),
+                                  subtitle: Text(quizData['Category']),
+                                  trailing: peerID == ""
+                                      ? quizData['isComplete']
+                                          ? Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Icon(
+                                                  Icons.check_circle_outline,
+                                                  color: Colors.green,
+                                                ),
+                                                Text("Live",
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey)),
+                                                SizedBox(width: 90)
+                                              ],
+                                            )
+                                          : Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                Icon(Icons.handyman),
+                                                Text("Work in progress",
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey))
+                                              ],
+                                            )
+                                      : Icon(Icons.arrow_forward)))));
                 });
           }
         });

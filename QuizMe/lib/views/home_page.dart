@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final views = [
-    MyQuizzes(),
+    MyQuizzes(peerID: "", peerName: ""),
     ExploreScreen(),
     TutorScreen(),
     PeersScreen(),

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quizme/utils/auth.dart';
 import 'package:quizme/model/db_user.dart';
 import 'package:quizme/widgets/app_drawer.dart';
+import 'package:quizme/views/my_quizzes.dart';
 import 'dart:math';
 
 class PeersScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _PeersScreenState extends State<PeersScreen> {
   String _mainDocID;
   String _selectedID;
   int _selectedIndx = -1;
+  bool deleteMode = false;
 
   @override
   void initState() {
@@ -33,12 +35,19 @@ class _PeersScreenState extends State<PeersScreen> {
       appBar: AppBar(
         title: const Text("Peers List"),
         actions: [
-          IconButton(
-            onPressed: () {
-              deleteUser(_selectedID);
-            },
-            icon: Icon(Icons.delete),
-          ),
+          TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _selectedIndx = -1;
+                  deleteMode = !deleteMode;
+                });
+              },
+              label: deleteMode
+                  ? Text("Done", style: TextStyle(color: Colors.white))
+                  : Text(""),
+              icon: deleteMode
+                  ? Icon(Icons.check, color: Colors.white)
+                  : Icon(Icons.delete, color: Colors.white)),
         ],
         backgroundColor: const Color(0xFFf85f6a),
       ),
@@ -46,27 +55,22 @@ class _PeersScreenState extends State<PeersScreen> {
       body: StreamBuilder(
         stream: getData(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData)
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
-          if (snapshot.data.docs.length == 0) {
-            return Card(
-                child: Column(children: [
-              ListTile(
-                title: Text("No Peers Added",
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              )
-            ]));
+          }
+          if (snapshot.data.docs.isEmpty) {
+            return const Center(child: Text("No Peers Added"));
           }
           return ListView.builder(
-              padding: EdgeInsets.only(top: 10),
               itemCount: snapshot.data.docs.length,
               itemBuilder: (BuildContext ctxt, int index) {
                 final docData = snapshot.data.docs[index];
-                return Card(
+                return Container(
+                    padding: const EdgeInsets.only(
+                        left: 5, right: 5, top: 1, bottom: 1),
                     child: Card(
-                        color: _selectedIndx == index
-                            ? Colors.cyanAccent.shade100.withOpacity(0.9)
+                        color: (_selectedIndx == index && deleteMode)
+                            ? Colors.red[100]
                             : Colors.white,
                         child: Column(
                           children: [
@@ -76,7 +80,7 @@ class _PeersScreenState extends State<PeersScreen> {
                                       .nextInt(Colors.primaries.length)],
                                   child: Text(
                                     docData['name'][0].toString().toUpperCase(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white),
                                   ),
@@ -89,6 +93,17 @@ class _PeersScreenState extends State<PeersScreen> {
                                     _selectedIndx = index;
                                     _selectedID = docData.id;
                                   });
+                                  if (deleteMode) {
+                                    deleteUser(_selectedID, docData['name']);
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => MyQuizzes(
+                                              peerID: docData.id,
+                                              peerName: docData['name'])),
+                                    );
+                                  }
                                 }),
                           ],
                         )));
@@ -198,14 +213,42 @@ class _PeersScreenState extends State<PeersScreen> {
     }
   }
 
-  Future<void> deleteUser(String id) {
-    return peersDB
-        .doc(_mainDocID)
-        .collection('peernames')
-        .doc(id.toString())
-        .delete()
-        .then((value) => print("Peer Deleted"))
-        .catchError((error) => print("Failed to Delete Peer: $error"));
+  Future<void> deleteUser(String id, String name) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Delete ${name}?"),
+          actions: [
+            TextButton(
+              child: const Text("NO"),
+              onPressed: () {
+                Navigator.pop(context);
+                return;
+              },
+            ),
+            TextButton(
+              child: const Text("YES"),
+              onPressed: () async {
+                Navigator.pop(context);
+                return peersDB
+                    .doc(_mainDocID)
+                    .collection('peernames')
+                    .doc(id.toString())
+                    .delete()
+                    .then((value) => print("Peer Deleted"))
+                    .catchError(
+                        (error) => print("Failed to Delete Peer: $error"));
+              },
+            )
+          ],
+        );
+      },
+    );
+
+    setState(() {
+      _selectedIndx = -1;
+    });
   }
 
   Future<void> addpeer(String peer) async {

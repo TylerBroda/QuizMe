@@ -125,14 +125,15 @@ class _QuestionListState extends State<QuestionList> {
                           },
                           child: index < questionAmount
                               ? Container(
-                                  decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              color: Colors.grey.shade300))),
-                                  child: ListTile(
-                                      title: Text(
-                                          quiz["Questions"][index]["Question"]),
-                                      subtitle: Text("Question ${index + 1}")))
+                                  padding: const EdgeInsets.only(
+                                      left: 5, right: 5, top: 1, bottom: 1),
+                                  child: Card(
+                                      elevation: 1,
+                                      child: ListTile(
+                                          title: Text(quiz["Questions"][index]
+                                              ["Question"]),
+                                          subtitle:
+                                              Text("Question ${index + 1}"))))
                               : Container(
                                   padding: const EdgeInsets.all(5),
                                   child: ListTile(
@@ -143,7 +144,7 @@ class _QuestionListState extends State<QuestionList> {
                                           },
                                           icon: const Icon(
                                               Icons.add_circle_outline,
-                                              color: Colors.blue,
+                                              color: Color(0xFFf85f6a),
                                               size: 40)),
                                       subtitle: const Center(
                                           child: Text("New Question")))));

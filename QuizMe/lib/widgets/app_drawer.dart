@@ -68,14 +68,14 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
               Spacer(),
               ListTile(
-                leading: Icon(Icons.settings),
+                leading: Icon(Icons.mail),
                 onTap: () {
                   _showUpdateEmailDialog(context);
                 },
                 title: Text("Change Email"),
               ),
               ListTile(
-                leading: Icon(Icons.settings),
+                leading: Icon(Icons.password),
                 onTap: () {
                   _showUpdatePasswordDialog(context);
                 },
@@ -198,6 +198,8 @@ class _AppDrawerState extends State<AppDrawer> {
                       padding: EdgeInsets.only(left: 40, right: 40),
                       width: 200,
                       child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            primary: const Color(0xFFf85f6a)),
                         onPressed: () {
                           setState(() {
                             if (_formKey.currentState.validate()) {
@@ -279,6 +281,8 @@ class _AppDrawerState extends State<AppDrawer> {
                       padding: EdgeInsets.only(left: 40, right: 40),
                       width: 200,
                       child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            primary: const Color(0xFFf85f6a)),
                         onPressed: () {
                           setState(() {
                             if (_formKey.currentState.validate()) {

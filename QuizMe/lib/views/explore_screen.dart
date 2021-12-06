@@ -28,78 +28,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          height: 35,
-          child: TextField(
-            controller: _searchController,
-            onChanged: (String? newValue) {
-              setState(() {});
-            },
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Search',
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                fillColor: Colors.white,
-                filled: true,
-                contentPadding: EdgeInsets.only(
-                  bottom: 35 / 2,
-                )),
-          ),
-        ),
-        actions: <Widget>[
-          Container(
-              margin: const EdgeInsets.only(top: 20, right: 5),
-              child: const Text(
-                'Category:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              )),
-          ButtonTheme(
-            alignedDropdown: true,
-            child: DropdownButton<String>(
-              value: dropdownValue,
-              icon: const Icon(Icons.arrow_downward),
-              iconEnabledColor: Colors.white,
-              iconSize: 20,
-              style: const TextStyle(color: Colors.black),
-              //For seperating colours between selected item & dropdown list items
-              //Had trouble with item positioning and dropdown size, commented out for now
-              /*
-              selectedItemBuilder: (BuildContext context) {
-                return options.map((String value) {
-                  return Text(
-                    dropdownValue,
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                  );
-                }).toList();
-              },
-              */
-              underline: Container(
-                height: 2,
-                color: Colors.white,
-              ),
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropdownValue = newValue!;
-                });
-              },
-              items: options.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Container(
-                    width: 50,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      value,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(width: 20)
-        ],
+        title: const Text("Explore"),
         backgroundColor: const Color(0xFFf85f6a),
       ),
       drawer: const AppDrawer(),
@@ -140,35 +69,100 @@ class _ExploreScreenState extends State<ExploreScreen> {
             }).toList();
           }
 
-          return ListView.builder(
-              itemCount: filterDocs.length,
-              itemBuilder: (BuildContext context, int index) {
-                final docData = filterDocs[index].data() as Map;
-                return GestureDetector(
-                    onTap: () {
-                      String quizID = filterDocs[index].id;
-                      print(quizID);
-                      Navigator.pushNamed(context, '/quizgame',
-                          arguments: QuizScreenArguments(quizID));
-                      // setState(() {
-                      //   _selectedIndex = index;
-                      //   _docID = snapshot.data!.docs[index].id;
-                      // });
-                    },
-                    child: Container(
-                        padding: const EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 8),
-                        child: Card(
-                          elevation: 3,
-                          color: (_selectedIndex == index)
-                              ? Colors.blue
-                              : Colors.white,
-                          child: ListTile(
-                            title: Text(docData['Name'].toString()),
-                            subtitle: Text(docData['User'].toString()),
-                            trailing: const Icon(Icons.arrow_forward),
-                          ),
-                        )));
-              });
+          return Column(children: [
+            Container(
+                padding: const EdgeInsets.all(15),
+                color: Colors.red[100],
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 8,
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (String? newValue) {
+                          setState(() {});
+                        },
+                        decoration: const InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.white, width: 0.0),
+                            ),
+                            border: OutlineInputBorder(),
+                            hintText: 'Search',
+                            prefixIcon: Icon(Icons.search, color: Colors.grey),
+                            fillColor: Colors.white,
+                            filled: true,
+                            contentPadding: EdgeInsets.all(14)),
+                      ),
+                    ),
+                    ButtonTheme(
+                      alignedDropdown: true,
+                      child: Container(
+                          margin: const EdgeInsets.only(left: 10),
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.white, width: 0),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4)),
+                          child: DropdownButton<String>(
+                            value: dropdownValue,
+                            icon: const Icon(Icons.arrow_downward),
+                            iconEnabledColor: Color(0xFFf85f6a),
+                            iconSize: 20,
+                            style: const TextStyle(color: Colors.black),
+                            underline: Container(
+                              height: 0,
+                            ),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                dropdownValue = newValue!;
+                              });
+                            },
+                            items: options
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Container(
+                                  width: 50,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    value,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          )),
+                    ),
+                  ],
+                )),
+            Expanded(
+                child: ListView.builder(
+                    itemCount: filterDocs.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final docData = filterDocs[index].data() as Map;
+                      return GestureDetector(
+                          onTap: () {
+                            String quizID = filterDocs[index].id;
+                            print(quizID);
+                            Navigator.pushNamed(context, '/quizgame',
+                                arguments: QuizScreenArguments(quizID));
+                            // setState(() {
+                            //   _selectedIndex = index;
+                            //   _docID = snapshot.data!.docs[index].id;
+                            // });
+                          },
+                          child: Container(
+                              padding: const EdgeInsets.only(
+                                  left: 5, right: 5, top: 1, bottom: 1),
+                              child: Card(
+                                elevation: 1,
+                                child: ListTile(
+                                  title: Text(docData['Name'].toString()),
+                                  subtitle: Text(docData['User'].toString()),
+                                  trailing: const Icon(Icons.arrow_forward),
+                                ),
+                              )));
+                    }))
+          ]);
         },
       ),
     );
