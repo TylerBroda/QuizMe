@@ -171,10 +171,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   )),
               Row(
                 children: [
-                  Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: Colors.grey),
-                  ),
                   Spacer(),
                   GestureDetector(
                     onTap: () {
